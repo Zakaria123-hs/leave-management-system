@@ -26,6 +26,7 @@ class AuthController extends Controller
         // STEP 2: Find the User
         // We look for the user record in the database.
         $user = User::where('email', $request->email)->first();
+        
 
         // STEP 3: Verification
         // Check if user exists AND if the password matches the hashed version in DB.
