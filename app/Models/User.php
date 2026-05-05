@@ -24,7 +24,14 @@ class User extends Authenticatable
         'email',
         'password',
     ];
+    public function leaveRequests() {
+        return $this->hasMany(LeaveRequest::class);
+    }
 
+    // An employee has balances for different leave types
+    public function balances() {
+        return $this->hasMany(LeaveBalance::class);
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
