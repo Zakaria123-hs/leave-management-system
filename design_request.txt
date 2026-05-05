@@ -1,9 +1,9 @@
-if (invalid input) → reject
+if (invalid input) → reject  check 
 
 if (start_date >= end_date)
-    reject("Invalid dates")
+    reject("Invalid dates") check
 
-calculate days_count
+calculate days_count check 
 
 if (overlap exists)
     reject("Overlapping request")
