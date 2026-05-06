@@ -18,4 +18,5 @@ Route::middleware(['auth:sanctum', 'role:employee'])->group(function () {
 Route::middleware(['auth:sanctum', 'role:manager'])->group(function () {
     Route::post('/leave/approve/{id}', [ManagerLeaveController::class, 'approve']);
     Route::post('/leave/reject/{id}', [ManagerLeaveController::class, 'reject']);
+    Route::get('/leave/pending', [ManagerLeaveController::class, 'pendingRequests']);
 });
