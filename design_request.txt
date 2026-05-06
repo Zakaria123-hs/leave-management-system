@@ -6,11 +6,11 @@ if (start_date >= end_date)
 calculate days_count check 
 
 if (overlap exists)
-    reject("Overlapping request")
+    reject("Overlapping request") check
 
 get leave_type
 
-if (leave_type.is_balance_based)
+if (leave_type.is_balance_based) chek
     get user balance (by user_id + leave_type_id)
 
     pending_days = sum(days_count where:
@@ -21,7 +21,7 @@ if (leave_type.is_balance_based)
     if (days_count + pending_days > remaining_days)
         reject("Insufficient balance")
 
-create leave_request:
+create leave_request: check
     - user_id
     - leave_type_id
     - start_date
@@ -34,4 +34,4 @@ create leave_request:
 
 You still need later:
 
-Exclude weekends/holidays (we’ll add later)
+Exclude weekends/holidays (we’ll add later)check
