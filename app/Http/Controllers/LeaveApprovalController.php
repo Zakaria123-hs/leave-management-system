@@ -89,11 +89,10 @@ class ManagerLeaveController extends Controller
 
     public function pendingRequests() {
         $pending_req = DB::table('leave_requests')
-            // Join with users to get the employee name
             ->join('users', 'leave_requests.user_id', '=', 'users.id')
-            // Join with leave_types to see "Annual Leave" instead of just ID "1"
             ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
             ->where('leave_requests.status', 'pending') 
+            ->orderBy('leave_requests.created_at', 'desc')
             ->select(
                 'leave_requests.*', 
                 'users.name as employee_name', 
