@@ -108,4 +108,35 @@ class LeaveRequestController extends Controller
         return response()->json(['message' => 'Leave request submitted successfully!'], 201);
 
     }
+
+    public function leaveRequests() {
+        $requests = DB::table('leave_requests')
+            ->leftJoin('users', 'users.id', '=', 'leave_requests.manager_id')
+            ->join('leave_types', 'leave_requests.leave_id', '=', 'leave_types.id')
+            ->where('leave_requests.user_id', auth()->id())
+            ->select(
+                'leave_types.name as leave_type',
+                'leave_requests.created_at',
+                'leave_requests.status',
+                'leave_requests.reason',
+                'users.name as approved_by'
+            )
+            ->orderBy('leave_requests.created_at', 'desc')
+            ->get();
+
+        return response()->json(['my_requests' => $requests]);
+    }
+
+    public function myBalances() {
+        $balance = DB::table('leave_balances')
+            ->join('leave_types', 'leave_balances.leave_type_id', '=', 'leave_types.id')
+            ->where('leave_balances.user_id', auth()->id())
+            ->select(
+                'leave_types.name as leave_type',
+                'leave_balances.remaining_days',
+                'leave_balances.used_days'
+            )
+            ->get();
+        return response()->json(['myBalance' => $balance]);
+    }
 }

@@ -18,6 +18,9 @@ return new class extends Migration
             $table->decimal('remaining_days', 5, 2); // Allows half-days
             $table->timestamps();
         });
+        Schema::table('leave_balances', function (Blueprint $table) {
+        $table->integer('used_days')->default(0)->after('remaining_days');
+    });
     }
 
     /**

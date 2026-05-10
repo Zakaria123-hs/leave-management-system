@@ -34,14 +34,14 @@ class ManagerLeaveController extends Controller
             }
 
             $leaveType = DB::table('leave_types')
-                ->where('id', $leaveRequest->leave_type_id)
+                ->where('id', $leaveRequest->leave_id)
                 ->first();
 
             if ($leaveType && $leaveType->is_balance_based) {
 
                 $balance = DB::table('leave_balances')
                     ->where('user_id', $leaveRequest->user_id)
-                    ->where('leave_type_id', $leaveRequest->leave_type_id)
+                    ->where('leave_type_id', $leaveRequest->leave_id)
                     ->lockForUpdate()
                     ->first();
 
@@ -54,10 +54,13 @@ class ManagerLeaveController extends Controller
                 }
 
                 DB::table('leave_balances')
-                    ->where('id', $balance->id)
-                    ->update([
-                        'remaining_days' => $balance->remaining_days - $leaveRequest->days_count
-                    ]);
+                ->where('user_id', $leaveRequest->user_id)
+                ->where('leave_type_id', $leaveRequest->leave_id)
+                ->update([
+                    'remaining_days' => DB::raw("remaining_days - $leaveRequest->days_count"),
+                    'used_days' => DB::raw("used_days + $leaveRequest->days_count")
+                ]);
+
             }
 
             DB::table('leave_requests')->where('id', $id)->update([
