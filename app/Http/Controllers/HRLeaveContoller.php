@@ -28,5 +28,5 @@ class HRLeaveContoller extends Controller
             ->get();
 
         return response()->json(['hr_report' => $report]);
-    }
+    } 
 }

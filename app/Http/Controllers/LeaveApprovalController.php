@@ -5,6 +5,18 @@ use Illuminate\Support\Facades\DB;
 
 class ManagerLeaveController extends Controller
 {
+    
+    public function notification($userId, $leaveRequestId, $type, $message)
+    {
+        DB::table('notifications')->insert([
+            'user_id' => $userId,
+            'leave_request_id' => $leaveRequestId,
+            'type' => $type,
+            'message' => $message,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
     public function approve($id)
     {
         return DB::transaction(function () use ($id) {
@@ -55,6 +67,12 @@ class ManagerLeaveController extends Controller
                 'updated_at' => now()
             ]);
 
+            $this->notification(
+                $leaveRequest->user_id,
+                $leaveRequest->id,
+                'leave_approved',
+                'Your leave request has been approved'
+            );
             return response()->json(['message' => 'Approved']);
         });
     }
@@ -81,6 +99,13 @@ class ManagerLeaveController extends Controller
                 'manager_id' => auth()->id(),
                 'rejected_at' => now(),
             ]);
+
+            $this->notification(
+                $leaveRequest->user_id,
+                $leaveRequest->id,
+                'leave_rejected',
+                'Your leave request has been rejected'
+            );
 
             return response()->json(['message' => 'Rejected successfully']);
         });

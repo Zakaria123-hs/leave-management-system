@@ -27,6 +27,9 @@ class LeaveRequestController extends Controller
     }
 
     public function store(Request $request) {
+        $manager= DB::table('users')
+            ->where('role','manager')
+            ->first();
         $validate = validator::make($request->all(),[
             'leave_type_id' => 'required|exists:leave_types,id',
             'start_date'    => 'required|date|after_or_equal:today',
@@ -80,7 +83,7 @@ class LeaveRequestController extends Controller
             }
         }
 
-        DB::table('leave_requests')->insert([
+        $leave_request_id = DB::table('leave_requests')->insertGetId([
             'user_id'       => auth()->id(),
             'leave_type_id' => $request->leave_type_id,
             'start_date'    => $request->start_date,
@@ -88,8 +91,18 @@ class LeaveRequestController extends Controller
             'days_count'    => $days_count,
             'reason'        => $request->reason,
             'status'        => 'pending',
+            'manager_id'    => $manager->id,
             'created_at'    => now(),
             'updated_at'    => now(),
+        ]);
+
+        DB::table('notifications')->insert([
+            'user_id' => $manager->id,
+            'leave_request_id' => $leave_request_id,
+            'type' => 'leave_created',
+            'message' => 'Employee submitted a new leave request',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         return response()->json(['message' => 'Leave request submitted successfully!'], 201);

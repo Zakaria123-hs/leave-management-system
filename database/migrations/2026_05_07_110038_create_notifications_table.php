@@ -22,7 +22,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained()
                 ->onDelete('cascade');
-
+            
             // notification type (leave_created|leave_approved|leave_rejected)
             $table->string('type');
 
