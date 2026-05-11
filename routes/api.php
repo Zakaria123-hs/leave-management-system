@@ -19,6 +19,7 @@ Route::middleware(['auth:sanctum', 'role:employee'])->group(function () {
     // Route::get('/leave-requests/me', [LeaveRequestController::class, 'myHistory']);
 
     Route::get('/my-notifications', [leaveNotificationController::class, 'myNotifications']);
+    Route::post('/notifications/{id}/read', [leaveNotificationController::class, 'readNotification']);
 });
 
 Route::middleware(['auth:sanctum', 'role:manager'])->group(function () {
