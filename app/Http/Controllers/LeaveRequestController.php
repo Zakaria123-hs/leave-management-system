@@ -9,20 +9,33 @@ use Illuminate\Support\Facades\DB;
 
 class LeaveRequestController extends Controller
 {
-    public function count_days($start_day, $end_day){
-        $start = Carbon::parse($start_day);
-        $end = Carbon::parse($end_day);
+    public function count_days($start_day, $end_day) {
+        $start = \Carbon\Carbon::parse($start_day);
+        $end = \Carbon\Carbon::parse($end_day);
 
-        $workingDays = $start->diffInDaysFiltered(function (Carbon $date) {
-            return !$date->isWeekend(); 
-        }, $end) + 1;
+        $period = \Carbon\CarbonPeriod::create($start, $end);
+        $days_count = 0;
 
-        $holidayCount = DB::table('holidays')
-            ->whereBetween('date', [$start_day, $end_day])
-            ->whereRaw('DAYOFWEEK(date) NOT IN (1, 7)') // 1 = Sunday, 7 = Saturday
-            ->count();
+        foreach ($period as $date) {
+            // 1. Skip weekends
+            if ($date->isWeekend()) {
+                continue;
+            }
 
-        $days_count = $workingDays - $holidayCount;
+            // 2. Check holiday (ensure format is exactly YYYY-MM-DD)
+            $formattedDate = $date->toDateString(); 
+            
+            $isHoliday = DB::table('holidays')
+                ->whereDate('date', $formattedDate)
+                ->exists();
+
+            if ($isHoliday) {
+                continue; // Skip this day if it's a holiday
+            }
+
+            $days_count++;
+        }
+
         return $days_count;
     }
 

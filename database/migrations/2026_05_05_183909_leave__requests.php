@@ -21,6 +21,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('manager_id')->nullable()->constrained('users'); // The approver
             $table->text('reason')->nullable();
+            $table->date('approved_at')->default(null);
             $table->timestamps();
         });
     }
