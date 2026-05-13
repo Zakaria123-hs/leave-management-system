@@ -1,4 +1,13 @@
+import api from "../api/axios";
 
-import axios from axios
-export const login = 
+export const login = async (data) => {
+    return await api.post("/login", data);
+};
 
+export const logout = async () => {
+    return await api.post("/logout");
+};
+
+export const getUser = async () => {
+    return await api.get("/user");
+};
