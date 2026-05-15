@@ -41,6 +41,7 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+
     /*
     |--------------------------------------------------------------------------
     | Application URL
@@ -123,5 +124,14 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
     
-
+    'guards' => [
+        'web' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'api' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+    ],
 ];

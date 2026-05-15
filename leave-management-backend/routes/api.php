@@ -7,10 +7,7 @@ use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\ManagerLeaveController;
 use App\Http\Controllers\HRLeaveContoller;
 use App\Http\Controllers\leaveNotificationController;
-
-
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
+use Illuminate\Http\Request;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

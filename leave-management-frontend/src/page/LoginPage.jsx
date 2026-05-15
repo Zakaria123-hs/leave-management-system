@@ -1,6 +1,5 @@
 import  { useState } from 'react'
-import axios from 'axios'
-import { login } from '../services/authService'
+import api from "../api/axios";
 import { useAuth } from '../context/AuthContext'
 // import { useNavigate } from 'react-router-dom'
 const LoginPage = () => {
@@ -20,11 +19,8 @@ const LoginPage = () => {
     const HandleLogin = async (e) => {
         e.preventDefault();
         try {
-            await axios.get(
-                "http://127.0.0.1:8000/sanctum/csrf-cookie",
-                { withCredentials: true }
-            );
-            const response = await login(userLogin)
+            await api.get("/sanctum/csrf-cookie");
+            const response = await api.post("/api/login", userLogin);
             setUser(response.data.user)
             if(response.data.user.role === 'employee') {
                 console.log('/employee')

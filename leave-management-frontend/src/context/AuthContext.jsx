@@ -1,5 +1,9 @@
 import { createContext, useContext, useState, useMemo, useEffect  } from "react";
 import axios from "axios";
+import api from "../api/axios";
+
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = 'http://localhost:8000';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -9,10 +13,12 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const initializeAuth = async () => {
             try {
-                await axios.get("http://127.0.0.1:8000/sanctum/csrf-cookie");
 
-                const response = await axios.get("http://127.0.0.1:8000/api/user");
-                setUser(response.data); 
+                await api.get("/sanctum/csrf-cookie");
+
+                const response = await api.get("/api/user");
+                setUser(response.data);
+
             } catch(error){
                 console.error("Auth initialization failed:", error);
                 setUser(null);
