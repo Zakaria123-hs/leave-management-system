@@ -1,6 +1,11 @@
+import LogoutButton from "./LogoutButton"
+
 const EmployeeDashboard = () => {
     return (
-        <div>EmployeeDashboard</div>
+        <>
+            <div>EmployeeDashboard</div>
+            <LogoutButton/>
+        </>
     )
 }
 

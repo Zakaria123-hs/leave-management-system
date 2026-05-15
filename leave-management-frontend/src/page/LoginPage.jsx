@@ -1,9 +1,9 @@
 import  { useState } from 'react'
 import api from "../api/axios";
 import { useAuth } from '../context/AuthContext'
-// import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 const LoginPage = () => {
-    // const Navigate = useNavigate()
+    const Navigate = useNavigate()
     const { setUser } = useAuth();
     const [userLogin, setUserLogin] = useState({
         email: '',
@@ -23,13 +23,13 @@ const LoginPage = () => {
             const response = await api.post("/api/login", userLogin);
             setUser(response.data.user)
             if(response.data.user.role === 'employee') {
-                console.log('/employee')
+                Navigate('/employee')
             }
             if(response.data.user.role === 'manager') {
-                console.log('/manager')
+                Navigate('/manager')
             }
             if(response.data.user.role === 'hr') {
-                console.log('/hr')
+                Navigate('/hr')
             }
         }catch(error) {
             
