@@ -44,7 +44,7 @@ return [
         ],
 
         'api' => [
-            'driver' => 'sanctum', // ← must be sanctum, not token
+            'driver' => 'sanctum',
             'provider' => 'users',
         ],
     ],

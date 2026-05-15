@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-// 3. Pro Hook: Add an error check to ensure hook is used inside a Provider
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (!context) {

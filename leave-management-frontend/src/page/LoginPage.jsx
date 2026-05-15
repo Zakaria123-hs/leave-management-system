@@ -32,7 +32,7 @@ const LoginPage = () => {
                 console.log('/hr')
             }
         }catch(error) {
-
+            
             if (error.response?.status === 401) {
                 alert("Invalid Credentials");
             } else {
