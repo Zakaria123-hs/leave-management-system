@@ -125,7 +125,7 @@ class LeaveRequestController extends Controller
     public function leaveRequests() {
         $requests = DB::table('leave_requests')
             ->leftJoin('users', 'users.id', '=', 'leave_requests.manager_id')
-            ->join('leave_types', 'leave_requests.leave_id', '=', 'leave_types.id')
+            ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
             ->where('leave_requests.user_id', auth()->id())
             ->select(
                 'leave_types.name as leave_type',

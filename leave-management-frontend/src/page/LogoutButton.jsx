@@ -1,6 +1,6 @@
+import { logout } from '../services/authService';
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
 
 const LogoutButton = () => {
     const { setUser } = useAuth();
@@ -8,7 +8,7 @@ const LogoutButton = () => {
 
     const handleLogout = async () => {
         try {
-            await api.post("/api/logout");
+            await logout();
         } catch (error) {
             console.error("Logout error:", error);
         } finally {
@@ -17,11 +17,6 @@ const LogoutButton = () => {
         }
     };
 
-    return (
-        <button onClick={handleLogout}>
-            Logout
-        </button>
-    );
+    return <button onClick={handleLogout}>Logout</button>;
 };
-
 export default LogoutButton;
