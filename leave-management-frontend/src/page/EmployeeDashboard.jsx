@@ -1,8 +1,12 @@
 import LogoutButton from "./LogoutButton"
 import { getMyBalances, getMyNotifications, getMyRequests } from "../services/employeeService"
 import { useState, useEffect } from "react"
+import { useAuth } from "../context/AuthContext";
 import LeaveRequestForm from "../components/LeaveRequestForm";
+import LoadingSpinner from "../components/LoadingSpinner";
+
 const EmployeeDashboard = () => {
+    const {user} = useAuth()
     const [balances, setBalances] = useState([]);
     const [requests, setRequests] = useState([]);
     const [notifications, setNotifications] = useState([]);
@@ -20,6 +24,7 @@ const EmployeeDashboard = () => {
             setBalances(balancesRes.data.myBalance);
             setRequests(requestsRes.data.my_requests);
             setNotifications(notificationsRes.data.notifications);
+            console.log(requestsRes.data.my_requests)
         } catch (error) {
             console.error("Failed to fetch data:", error);
         } finally {
@@ -28,10 +33,13 @@ const EmployeeDashboard = () => {
     };
     useEffect(() => {
         fetchData();
+        console.log(user)
+        console.log(requests)
+
     }, []);
 
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <LoadingSpinner/>;
 
     return (
         <div>

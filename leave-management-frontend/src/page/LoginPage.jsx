@@ -96,7 +96,7 @@ const LoginPage = () => {
                 </button>
 
                 <p className="signup-link">
-                    n'avez pas de compte <a href="#">Contactez  RH</a>
+                    n'avez pas de compte! <a href="#">Contactez  RH</a>
                 </p>
             </div>
         </div>
