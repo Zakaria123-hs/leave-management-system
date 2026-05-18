@@ -1,4 +1,4 @@
-import LogoutButton from "./LogoutButton"
+import LeaveRequestsTable from "../components/LeaveRequestsTable";
 import { getMyBalances, getMyNotifications, getMyRequests } from "../services/employeeService"
 import { useState, useEffect } from "react"
 import { useAuth } from "../context/AuthContext";
@@ -42,58 +42,15 @@ const EmployeeDashboard = () => {
     if (loading) return <LoadingSpinner/>;
 
     return (
-        <div>
-            <LogoutButton />
-            <h1>Employee Dashboard</h1>
+        <div className="min-h-screen bg-gray-100 p-6">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+                <div className="lg:col-span-2">
+                    {/* 3. Call the table here and pass down the requests array as a prop */}
+                    <LeaveRequestsTable requests={requests} />
+                </div>
 
-            {/* Balances */}
-            <section>
-                <h2>Leave Balances</h2>
-                {balances.length === 0 ? <p>No balances found.</p> : (
-                    <ul>
-                        {balances.map((balance, index) => (
-                            <li key={index}>
-                                {balance.leave_type}: {balance.remaining_days} days remaining
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </section>
-
-            {/* Leave Requests */}
-            <section>
-                <h2>My Leave Requests</h2>
-                {requests.length === 0 ? <p>No requests found.</p> : (
-                    <ul>
-                        {requests.map((req) => (
-                            <li key={req.id}>
-                                {req.leave_type} | {req.start_date} → {req.end_date} | Status: {req.status}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </section>
-
-            {/* Notifications */}
-            <section>
-                <h2>Notifications</h2>
-                {notifications.length === 0 ? <p>No notifications.</p> : (
-                    <ul>
-                        {notifications.map((notif) => (
-                            <li key={notif.id}>
-                                {notif.message}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </section>
-
-            <button onClick={()=>setShowForm(!showForm)}>+leave</button>
-            <br/>
-            {
-                showForm && <LeaveRequestForm onSuccess={fetchData}/>
-            }
-
+            </div>
         </div>
     );
 };
