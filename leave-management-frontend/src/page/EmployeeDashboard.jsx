@@ -82,11 +82,6 @@ const EmployeeDashboard = () => {
 
             <button onClick={()=>setShowForm(!showForm)}>+leave</button>
             <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
-            <br/>
             {
                 showForm && <LeaveRequestForm onSuccess={fetchData}/>
             }
