@@ -32,6 +32,20 @@ class User extends Authenticatable
     public function balances() {
         return $this->hasMany(LeaveBalance::class);
     }
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class, 'id_service');
+    }
+    public function supervisor()
+    {
+        return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    public function subordinates()
+    {
+        return $this->hasMany(User::class, 'supervisor_id');
+    }
     /**
      * The attributes that should be hidden for serialization.
      *
