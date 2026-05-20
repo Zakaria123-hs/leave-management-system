@@ -6,31 +6,31 @@ import ManagerDashboard from './page/ManagerDashboard'
 import HRDashboard from './page/HRDashboard'
 import ProtectedRoute from './routes/ProtectedRoute'
 function App() {
-  return (
-    <>
-      <Routes>
-          <Route path="/login" element={<LoginPage />} />
+    return (
+        <>
+        <Routes>
+            <Route path="/login" element={<LoginPage />} />
 
-          <Route path="/employee" element={
-              <ProtectedRoute role="employee">
-                  <EmployeeDashboard />
-              </ProtectedRoute>
-          } />
+            <Route path="/employee" element={
+                <ProtectedRoute role="supervisor">
+                    <EmployeeDashboard />
+                </ProtectedRoute>
+            } />
 
-          <Route path="/manager" element={
-              <ProtectedRoute role="manager">
-                  <ManagerDashboard />
-              </ProtectedRoute>
-          } />
+            <Route path="/manager" element={
+                <ProtectedRoute role="manager">
+                    <ManagerDashboard />
+                </ProtectedRoute>
+            } />
 
-          <Route path="/hr" element={
-              <ProtectedRoute role="hr">
-                  <HRDashboard />
-              </ProtectedRoute>
-          } />
-      </Routes>
+            <Route path="/hr" element={
+                <ProtectedRoute role="hr">
+                    <HRDashboard />
+                </ProtectedRoute>
+            } />
+        </Routes>
     </>
-  )
+)
 }
 
 export default App

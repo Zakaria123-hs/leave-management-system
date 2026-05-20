@@ -27,12 +27,12 @@ const LoginPage = () => {
             const response = await login(userLogin);
             setUser(response.data.user);
             
-            if(response.data.user.role === 'employee') {
+            if(response.data.user.role === 'employee' || response.data.user.role === 'supervisor') {
                 Navigate('/employee');
             }
-            if(response.data.user.role === 'manager') {
-                Navigate('/manager');
-            }
+            // if(response.data.user.role === 'manager') {
+            //     Navigate('/manager');
+            // }
             if(response.data.user.role === 'hr') {
                 Navigate('/hr');
             }
@@ -43,6 +43,7 @@ const LoginPage = () => {
                 console.error("Login Error:", error);
             }
         }
+        console.log('ok§')
     }
 
     return (

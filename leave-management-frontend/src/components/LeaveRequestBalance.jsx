@@ -1,6 +1,6 @@
 import React from 'react';
 
-const LeaveRequestBalance = ({ balance = [], onClose }) => {
+const LeaveRequestBalance = ({ balance = [], onClose  }) => {
     return (
         /* Full screen fixed backdrop to center the modal and blur the dashboard background */
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm p-4 animate-fadeIn">

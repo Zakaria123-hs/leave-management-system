@@ -1,9 +1,9 @@
 import  { useState, useMemo } from 'react';
 import LeaveRequestBalance from './LeaveRequestBalance';
 
-const LeaveRequestsTable = ({ requests = [], onBalanceClick }) => {
+const LeaveRequestsTable = ({ requests = [], onBalanceClick,onFormClick }) => {
     const [selectedCategory, setSelectedCategory] = useState('All');
-    const [showBalance, setBalance] = useState(false)
+    const [showBalance] = useState(false)
 
     // 1. Extract unique categories dynamically from the requests data
     const categories = useMemo(() => {
@@ -61,10 +61,8 @@ const LeaveRequestsTable = ({ requests = [], onBalanceClick }) => {
 
     return (
         <div className="w-full space-y-4">
-            
             {/* ACTION BAR (FILTERS AND BUTTONS) */}
             <div className="flex flex-col sm:flex-row gap-3 items-center justify-between   w-full">
-                
                 {/* Left Side: Filter and Select Dropdown */}
                 <div className="flex items-center gap-2 w-full sm:w-auto">
                     <button className="flex items-center gap-2 bg-gray-50 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-100 transition cursor-pointer">
@@ -102,11 +100,14 @@ const LeaveRequestsTable = ({ requests = [], onBalanceClick }) => {
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                     <button 
                         onClick={onBalanceClick} // 2. Add this click triggers event handler
-                        className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 transition active:scale-95"
+                        className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-gray-50 transition active:scale-95 cursor-pointer"
                     >
                         My balance
                     </button>
-                    <button className="bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-blue-700 transition">
+                    <button 
+                        onClick={onFormClick}
+                        className="bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-blue-700 transition cursor-pointer"
+                    >
                         Time request
                     </button>
                 </div>

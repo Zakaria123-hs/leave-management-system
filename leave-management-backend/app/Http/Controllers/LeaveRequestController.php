@@ -162,6 +162,8 @@ class LeaveRequestController extends Controller
                 'leave_types.name as leave_type',
                 'leave_requests.created_at',
                 'leave_requests.status',
+                'leave_requests.start_date', // Added for range display
+                'leave_requests.end_date',
                 'leave_requests.reason',
                 'users.name as approved_by' // This will now correctly return the supervisor's name!
             )
