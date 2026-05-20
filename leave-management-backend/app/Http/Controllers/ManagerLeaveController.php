@@ -116,19 +116,24 @@ class ManagerLeaveController extends Controller
 
 
     public function pendingRequests() {
-        $pending_req = DB::table('leave_requests')
-            ->join('users', 'leave_requests.user_id', '=', 'users.id')
-            ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
-            ->where('leave_requests.status', 'pending') 
-            ->orderBy('leave_requests.created_at', 'desc')
-            ->select(
-                'leave_requests.*', 
-                'users.name as employee_name', 
-                'leave_types.name as leave_type_label'
-            )
-            ->get();
+        $pending_req = LeaveRequest::with(['user', 'leaveType'])
+        ->where('status', 'pending')
+        ->where('supervisor_id', auth()->id())
+        ->orderBy('created_at', 'desc')
+        ->get();
         
-        return response()->json(['pending_requests' => $pending_req]);
+        return response()->json($pending_req->map(function ($req) {
+            return [
+                'id'               => $req->id,
+                'employee_name'    => $req->user->name,
+                'leave_type_label' => $req->leaveType->name,
+                'start_date'       => $req->start_date,
+                'end_date'         => $req->end_date,
+                'status'           => $req->status,
+                'reason'           => $req->reason,
+                'created_at'       => $req->created_at,
+            ];
+        }));
     }
 
 }

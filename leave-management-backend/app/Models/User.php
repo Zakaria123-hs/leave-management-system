@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\LeaveBalance;  // ← required
+use App\Models\LeaveRequest;
+use App\Models\service;
 
 class User extends Authenticatable
 {

@@ -4,39 +4,104 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
+
+        // Create an HR Manager first
     public function run(): void
     {
-        // Create an HR Manager first
-        $hr = \App\Models\User::create([
-            'name' => 'admin',
-            'email' => 'admin@gmail.com',
-            'password' => bcrypt('password'),
-            'role' => 'hr',
-            'service' => 'Human Resources'
-        ]);
-
-        // Create a Manager
-        $manager = \App\Models\User::create([
-            'name' => 'manager',
-            'email' => 'manager@gmail.com',
-            'password' => bcrypt('password'),
-            'role' => 'manager',
-            'service' => 'Digital Development',
-        ]);
-
-        // Create an Employee assigned to that Manager
-        \App\Models\User::create([
-            'name' => 'employee1',
-            'email' => 'employee1@gmail.com',
-            'password' => bcrypt('password'),
-            'role' => 'employee',
-            'service' => 'Digital Development',
+        DB::table('users')->insert([
+            // HR
+            // Manager
+            [
+            'name'         => 'Ahmed supervisor',
+            'email'        => 'ahmed@supervisor.com',
+            'password'     => Hash::make('password'),
+            'role'         => 'supervisor',
+            'id_service'   => 2, // IT
+            'supervisor_id'=> 2,
+            'created_at'   => now(),
+            'updated_at'   => now(),
+            ],
+            [
+            'name'         => 'kenza supervisor',
+            'email'        => 'kenza@supervisor.com',
+            'password'     => Hash::make('password'),
+            'role'         => 'supervisor',
+            'id_service'   => 2, // IT
+            'supervisor_id'=> 2,
+            'created_at'   => now(),
+            'updated_at'   => now(),
+            ],
+            [
+                'name'         => 'Sara employee',
+                'email'        => 'sara@hemployee.com',
+                'password'     => Hash::make('password'),
+                'role'         => 'employee',
+                'id_service'   => 1, // Human Resources
+                'supervisor_id'=> 4,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ],
+            // Employees
+            [
+                'name'         => 'Youssef Employee',
+                'email'        => 'youssef@employee.com',
+                'password'     => Hash::make('password'),
+                'role'         => 'employee',
+                'id_service'   => 2, // IT
+                'supervisor_id'=> 4, // Ahmed is his manager
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ],
+            [
+                'name'         => 'Karim Employee',
+                'email'        => 'karim@employee.com',
+                'password'     => Hash::make('password'),
+                'role'         => 'employee',
+                'id_service'   => 2, // IT
+                'supervisor_id'=> 4, // Ahmed is his manager
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ],
+            [
+                'name'         => 'otman employee',
+                'email'        => 'otman@hemployee.com',
+                'password'     => Hash::make('password'),
+                'role'         => 'employee',
+                'id_service'   => 1, // Human Resources
+                'supervisor_id'=> 5,
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ],
+            // Employees
+            [
+                'name'         => 'hatim Employee',
+                'email'        => 'hatim@employee.com',
+                'password'     => Hash::make('password'),
+                'role'         => 'employee',
+                'id_service'   => 2, // IT
+                'supervisor_id'=> 5, // Ahmed is his manager
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ],
+            [
+                'name'         => 'yassmin Employee',
+                'email'        => 'yassmin@employee.com',
+                'password'     => Hash::make('password'),
+                'role'         => 'employee',
+                'id_service'   => 2, // IT
+                'supervisor_id'=> 5, // Ahmed is his manager
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ],
         ]);
     }
 }
+

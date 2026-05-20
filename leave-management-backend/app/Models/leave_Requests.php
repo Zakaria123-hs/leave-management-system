@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\leaveType;  // ← required
+
 
 class LeaveRequest extends Model {
     protected $fillable = ['user_id', 'leave_type_id', 'start_date', 'end_date', 'days_count', 'status', 'manager_id', 'reason'];
@@ -16,7 +18,7 @@ class LeaveRequest extends Model {
     }
 
     // Relationship to see who the manager is for this specific request
-    public function manager() {
-        return $this->belongsTo(User::class, 'manager_id');
+    public function supervisor() {
+        return $this->belongsTo(User::class, 'supervisor_id');
     }
 }
