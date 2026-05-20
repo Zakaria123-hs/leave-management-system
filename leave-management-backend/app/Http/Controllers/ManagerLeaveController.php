@@ -129,6 +129,7 @@ class ManagerLeaveController extends Controller
                 'leave_type_label' => $req->leaveType->name,
                 'start_date'       => $req->start_date,
                 'end_date'         => $req->end_date,
+                'days_count'       => $req->days_count,
                 'status'           => $req->status,
                 'reason'           => $req->reason,
                 'created_at'       => $req->created_at,

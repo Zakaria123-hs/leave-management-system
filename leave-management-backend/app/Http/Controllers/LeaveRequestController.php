@@ -40,9 +40,6 @@ class LeaveRequestController extends Controller
     }
 
     public function store(Request $request) {
-        $manager= DB::table('users')
-            ->where('role','manager')
-            ->first();
         $validate = validator::make($request->all(),[
             'leave_type_id' => 'required|exists:leave_types,id',
             'start_date'    => 'required|date|after_or_equal:today',
@@ -95,22 +92,55 @@ class LeaveRequestController extends Controller
                 return response()->json(['error' => 'Your balance is insufficient'], 400);
             }
         }
+        $user = auth()->user(); // Fetches currently logged in employee profile metadata
+
+        // 1. Get the min_active_staff configuration limit for this specific service
+        $service = DB::table('services')
+            ->where('id', $user->id_service)
+            ->first();
+
+        if ($service) {
+            // 2. Count how many total employees are registered in this service department
+            $totalServiceStaff = DB::table('users')
+                ->where('id_service', $user->id_service)
+                ->count();
+
+            // 3. Count how many distinct colleagues are already away OR holding a spot on these dates
+            $activeOnLeave = DB::table('leave_requests')
+                ->join('users', 'leave_requests.user_id', '=', 'users.id')
+                ->where('users.id_service', $user->id_service)
+                ->whereIn('leave_requests.status', ['approved', 'pending'])
+                ->where('leave_requests.start_date', '<=', $request->end_date)
+                ->where('leave_requests.end_date', '>=', $request->start_date)
+                ->count(DB::raw('DISTINCT leave_requests.user_id')); // Counts unique staff members
+
+            // 4. Calculate if adding THIS request drops the team layout below the minimum threshold
+            $currentAvailableStaff = $totalServiceStaff - $activeOnLeave;
+
+            if (($currentAvailableStaff - 1) < $service->min_active_staff) {
+                return response()->json([
+                    'error' => "Cannot submit request. Your service requires a minimum of {$service->min_active_staff} active employees on duty. Too many staff members have overlapping requests during this timeframe."
+                ], 422);
+            }
+        }
+
+        $user = auth()->user();
 
         $leave_request_id = DB::table('leave_requests')->insertGetId([
-            'user_id'       => auth()->id(),
+            'user_id'       => $user->id,
             'leave_type_id' => $request->leave_type_id,
             'start_date'    => $request->start_date,
             'end_date'      => $request->end_date,
             'days_count'    => $days_count,
             'reason'        => $request->reason,
             'status'        => 'pending',
-            'manager_id'    => $manager->id,
+            'supervisor_id' => $user->supervisor_id, // ← directly from user column
             'created_at'    => now(),
             'updated_at'    => now(),
         ]);
 
         DB::table('notifications')->insert([
-            'user_id' => $manager->id,
+            'user_id' => $user->supervisor_id,
             'leave_request_id' => $leave_request_id,
             'type' => 'leave_created',
             'message' => 'Employee submitted a new leave request',
@@ -124,7 +154,8 @@ class LeaveRequestController extends Controller
 
     public function leaveRequests() {
         $requests = DB::table('leave_requests')
-            ->leftJoin('users', 'users.id', '=', 'leave_requests.manager_id')
+            // 1. FIXED: Join using supervisor_id instead of manager_id
+            ->leftJoin('users', 'users.id', '=', 'leave_requests.supervisor_id')
             ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
             ->where('leave_requests.user_id', auth()->id())
             ->select(
@@ -132,11 +163,12 @@ class LeaveRequestController extends Controller
                 'leave_requests.created_at',
                 'leave_requests.status',
                 'leave_requests.reason',
-                'users.name as approved_by'
+                'users.name as approved_by' // This will now correctly return the supervisor's name!
             )
             ->orderBy('leave_requests.created_at', 'desc')
             ->get();
 
+        // Keeping your standard structural json wrap layout response
         return response()->json(['my_requests' => $requests]);
     }
 
