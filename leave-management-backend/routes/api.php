@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::middleware(['auth:sanctum', 'role:employee'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:employee,supervisor'])->group(function () {
     Route::get('/leave-types', function () {
         $types = DB::table('leave_types')->get();
         return response()->json($types); 
@@ -20,14 +20,12 @@ Route::middleware(['auth:sanctum', 'role:employee'])->group(function () {
     Route::get('/my-leave-requests', [LeaveRequestController::class, 'leaveRequests']);
     Route::get('/my-balances', [LeaveRequestController::class, 'myBalances']);
     Route::post('/leave-requests', [LeaveRequestController::class, 'store']);
-    // Optional: Route to see my own history (it's good to have this too)
-    // Route::get('/leave-requests/me', [LeaveRequestController::class, 'myHistory']);
 
     Route::get('/my-notifications', [leaveNotificationController::class, 'myNotifications']);
     Route::post('/notifications/{id}/read', [leaveNotificationController::class, 'readNotification']);
 });
 
-Route::middleware(['auth:sanctum', 'role:manager'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:supervisor'])->group(function () {
     Route::post('/leave/approve/{id}', [ManagerLeaveController::class, 'approve']);
     Route::post('/leave/reject/{id}', [ManagerLeaveController::class, 'reject']);
     Route::get('/leave-requests/pending', [ManagerLeaveController::class, 'pendingRequests']);
