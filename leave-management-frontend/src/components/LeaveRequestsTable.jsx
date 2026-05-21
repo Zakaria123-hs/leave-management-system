@@ -106,7 +106,7 @@ const LeaveRequestsTable = ({ requests = [], onBalanceClick,onFormClick }) => {
                     </button>
                     <button 
                         onClick={onFormClick}
-                        className="bg-blue-600 text-white flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:bg-blue-700 transition cursor-pointer"
+                        className="bg-[#0071ab] text-white flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition cursor-pointer"
                     >
                         Time request
                     </button>
