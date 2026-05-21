@@ -7,26 +7,98 @@ use Illuminate\Support\Facades\DB;
 
 class HRLeaveContoller extends Controller
 {
-    public function hrReport() {
-        $report = DB::table('leave_requests')
+    
+    public function hrPendingRequests() {
+        // Get the authenticated HR user's department service ID
+        $hrServiceId = auth()->user()->id_service; 
+
+        $pending = DB::table('leave_requests')
             ->join('users as employees', 'leave_requests.user_id', '=', 'employees.id')
-            ->join('users as managers', 'leave_requests.manager_id', '=', 'managers.id')
+            ->join('users as supervisors', 'leave_requests.supervisor_id', '=', 'supervisors.id')
             ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
             
-            ->where('leave_requests.status', 'approved') 
+            // 1. Only fetch records belonging to this HR's service department
+            ->where('employees.id_service', $hrServiceId) 
             
-            ->orderBy('leave_requests.start_date', 'desc') 
+            // 2. CRITICAL: Only show what is waiting for HR validation!
+            ->where('leave_requests.status', 'pending_hr') 
             
+            ->orderBy('leave_requests.created_at', 'asc') 
             ->select(
+                'leave_requests.id',
                 'employees.name as employee_name',
                 'leave_types.name as leave_type',
                 'leave_requests.start_date',
                 'leave_requests.end_date',
                 'leave_requests.days_count',
-                'managers.name as approved_by'
+                'leave_requests.reason',
+                'supervisors.name as supervisor_who_approved'
             )
             ->get();
 
-        return response()->json(['hr_report' => $report]);
-    } 
+        return response()->json(['hr_pending' => $pending]);
+    }
+
+    public function hrValidate(Request $request, $id) {
+        $request->validate([
+            'action' => 'required|in:approved,rejected' // HR choice
+        ]);
+
+        // Find the specific request
+        $leaveRequest = DB::table('leave_requests')->where('id', $id)->first();
+
+        if (!$leaveRequest) {
+            return response()->json(['message' => 'Request not found'], 404);
+        }
+
+        if ($leaveRequest->status !== 'pending_hr') {
+            return response()->json(['message' => 'This request does not require HR validation'], 400);
+        }
+
+        if ($request->action === 'approved') {
+            // 1. Deduct the days from the employee's balance profile
+            $balance = DB::table('leave_balances')
+                ->where('user_id', $leaveRequest->user_id)
+                ->where('leave_type_id', $leaveRequest->leave_type_id)
+                ->first();
+
+            if ($balance) {
+                DB::table('leave_balances')
+                    ->where('id', $balance->id)
+                    ->update([
+                        'remaining_days' => $balance->remaining_days - $leaveRequest->days_count,
+                        'used_days' => $balance->used_days + $leaveRequest->days_count,
+                        'updated_at' => now()
+                    ]);
+            }
+
+            // 2. Update Leave Request Status to final approved state
+            DB::table('leave_requests')->where('id', $id)->update([
+                'status' => 'approved',
+                'approved_at' => now()
+            ]);
+
+            $msg = "Your leave request has been fully approved by HR!";
+        } else {
+            // If rejected by HR
+            DB::table('leave_requests')->where('id', $id)->update([
+                'status' => 'rejected',
+                'updated_at' => now()
+            ]);
+
+            $msg = "Your leave request was rejected during final HR validation.";
+        }
+
+        // 3. Send notification back to the Employee
+        DB::table('notifications')->insert([
+            'user_id' => $leaveRequest->user_id,
+            'leave_request_id' => $id,
+            'type' => 'leave_finalized',
+            'message' => $msg,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        return response()->json(['message' => 'Request successfully processed by HR']);
+    }
 }

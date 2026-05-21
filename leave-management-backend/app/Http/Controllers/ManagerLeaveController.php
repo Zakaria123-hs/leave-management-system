@@ -29,6 +29,7 @@ class ManagerLeaveController extends Controller
                 abort(404, 'Request not found');
             }
 
+            // 1. Check if it's awaiting supervisor review
             if ($leaveRequest->status !== 'pending') {
                 abort(400, 'Already processed');
             }
@@ -37,12 +38,13 @@ class ManagerLeaveController extends Controller
                 ->where('id', $leaveRequest->leave_type_id)
                 ->first();
 
+            // 💡 OPTIONAL SAFETYSIGNAL: We keep the balance read-check here 
+            // just to warn the supervisor if the balance is insufficient,
+            // BUT we remove the code that actually UPDATES and updates the table!
             if ($leaveType && $leaveType->is_balance_based) {
-
                 $balance = DB::table('leave_balances')
                     ->where('user_id', $leaveRequest->user_id)
                     ->where('leave_type_id', $leaveRequest->leave_type_id)
-                    ->lockForUpdate()
                     ->first();
 
                 if (!$balance) {
@@ -52,31 +54,25 @@ class ManagerLeaveController extends Controller
                 if ($balance->remaining_days < $leaveRequest->days_count) {
                     abort(400, 'Insufficient balance');
                 }
-
-                DB::table('leave_balances')
-                ->where('user_id', $leaveRequest->user_id)
-                ->where('leave_type_id', $leaveRequest->leave_type_id)
-                ->update([
-                    'remaining_days' => DB::raw("remaining_days - $leaveRequest->days_count"),
-                    'used_days' => DB::raw("used_days + $leaveRequest->days_count")
-                ]);
-
             }
 
+            // 2. Simply push the status to 'pending_hr' (Handing off to HR)
             DB::table('leave_requests')->where('id', $id)->update([
-                'status' => 'approved',
-                'manager_id' => auth()->id(),
-                'approved_at' => now(),
+                'status' => 'pending_hr',
+                'supervisor_id' => auth()->id(), // Saved from your MLD column schema
                 'updated_at' => now()
+                // 💡 Notice 'approved_at' is removed here because HR marks the final approval time!
             ]);
 
+            // 3. Notify the employee that it passed step 1
             $this->notification(
                 $leaveRequest->user_id,
                 $leaveRequest->id,
-                'leave_approved',
-                'Your leave request has been approved'
+                'leave_approved_by_supervisor',
+                'Your leave request has been approved by your manager and is awaiting final HR validation.'
             );
-            return response()->json(['message' => 'Approved']);
+
+            return response()->json(['message' => 'Approved by supervisor, sent to HR.']);
         });
     }
 
@@ -99,7 +95,7 @@ class ManagerLeaveController extends Controller
 
             DB::table('leave_requests')->where('id', $id)->update([
                 'status' => 'rejected',
-                'manager_id' => auth()->id(),
+                'supervisor' => auth()->id(),
                 'rejected_at' => now(),
             ]);
 
