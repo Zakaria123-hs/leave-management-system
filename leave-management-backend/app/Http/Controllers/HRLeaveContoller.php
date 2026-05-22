@@ -41,7 +41,7 @@ class HRLeaveContoller extends Controller
 
     public function hrValidate(Request $request, $id) {
         $request->validate([
-            'action' => 'required|in:approved,rejected' // HR choice
+            'action' => 'required|in:approved,rejected'
         ]);
 
         // Find the specific request
@@ -54,6 +54,9 @@ class HRLeaveContoller extends Controller
         if ($leaveRequest->status !== 'pending_hr') {
             return response()->json(['message' => 'This request does not require HR validation'], 400);
         }
+
+        // Fetch the employee details so we can use their name in the supervisor's notification
+        $employee = DB::table('users')->where('id', $leaveRequest->user_id)->first();
 
         if ($request->action === 'approved') {
             // 1. Deduct the days from the employee's balance profile
@@ -78,7 +81,11 @@ class HRLeaveContoller extends Controller
                 'approved_at' => now()
             ]);
 
-            $msg = "Your leave request has been fully approved by HR!";
+            // Define messages
+            $employeeMsg = "Your leave request has been fully approved by HR!";
+            $supervisorMsg = "The leave request for {$employee->name} has been fully approved by HR.";
+            $type = 'leave_final_approved';
+
         } else {
             // If rejected by HR
             DB::table('leave_requests')->where('id', $id)->update([
@@ -86,19 +93,36 @@ class HRLeaveContoller extends Controller
                 'updated_at' => now()
             ]);
 
-            $msg = "Your leave request was rejected during final HR validation.";
+            // Define messages
+            $employeeMsg = "Your leave request was rejected during final HR validation.";
+            $supervisorMsg = "The leave request for {$employee->name} was rejected during final HR validation.";
+            $type = 'leave_final_rejected';
         }
 
-        // 3. Send notification back to the Employee
+        // =========================================================
+        // 🔔 HR NOTIFICATION LAYER (Sends to both targets)
+        // =========================================================
+
+        // TARGET 1: Notify the Employee
         DB::table('notifications')->insert([
             'user_id' => $leaveRequest->user_id,
             'leave_request_id' => $id,
-            'type' => 'leave_finalized',
-            'message' => $msg,
+            'type' => $type,
+            'message' => $employeeMsg,
             'created_at' => now(),
             'updated_at' => now()
         ]);
 
-        return response()->json(['message' => 'Request successfully processed by HR']);
+        // TARGET 2: Notify the Supervisor who initiated step 1
+        DB::table('notifications')->insert([
+            'user_id' => $leaveRequest->supervisor_id, // Sends to the manager!
+            'leave_request_id' => $id,
+            'type' => $type,
+            'message' => $supervisorMsg,
+            'created_at' => now(),
+            'updated_at' => now()
+        ]);
+
+        return response()->json(['message' => 'Request successfully processed and notifications dispatched.']);
     }
 }

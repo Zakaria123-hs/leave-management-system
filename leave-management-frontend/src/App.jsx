@@ -1,37 +1,38 @@
-import './App.css'
-import LoginPage from './page/loginPage'
-import { Routes,Route } from 'react-router-dom'
-import EmployeeDashboard from './page/EmployeeDashboard'
-import ManagerDashboard from './page/ManagerDashboard'
-import HRDashboard from './page/HRDashboard'
-import ProtectedRoute from './routes/ProtectedRoute'
+import { Routes, Route, Navigate } from "react-router-dom";
+import RequestDashboard from "./page/RequestDashboard";
+import SupervisorDashboard from "./page/SupervisorDashboard";
+import Login from "./page/LoginPage";
+import ProtectedRoute from "./routes/ProtectedRoute"; // Your authentication middleware guard
 function App() {
     return (
-        <>
-        <Routes>
-            <Route path="/login" element={<LoginPage />} />
+        <Routes> {/* 💡 NO <BrowserRouter> wrap here! Only start with <Routes> */}
+            {/* Public Auth Gateway */}
+            <Route path="/login" element={<Login />} />
 
-            <Route path="/employee" element={
-                <ProtectedRoute role="supervisor">
-                    <EmployeeDashboard />
-                </ProtectedRoute>
-            } />
+            {/* Protected Supervisor Workspaces */}
+            <Route 
+                path="/supervisor/requests" 
+                element={
+                    <ProtectedRoute role={['supervisor']}>
+                        <SupervisorDashboard />
+                    </ProtectedRoute>
+                } 
+            />
 
-            <Route path="/manager" element={
-                <ProtectedRoute role="manager">
-                    <ManagerDashboard />
-                </ProtectedRoute>
-            } />
+            {/* Standard Employee Workspaces */}
+            <Route 
+                path="/dashboard" 
+                element={
+                    <ProtectedRoute role={['employee', 'supervisor', 'hr']}>
+                        <RequestDashboard />
+                    </ProtectedRoute>
+                } 
+            />
 
-            <Route path="/hr" element={
-                <ProtectedRoute role="hr">
-                    <HRDashboard />
-                </ProtectedRoute>
-            } />
+            {/* Fallback Redirect */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
-    </>
-)
+    );
 }
 
-export default App
-
+export default App;

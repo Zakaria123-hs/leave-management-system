@@ -6,7 +6,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import LeaveRequestBalance from "../components/LeaveRequestBalance";
 import DashboardLayout from "../layouts/DashboardLayout";
 
-const EmployeeDashboard = () => {
+const RequestDashboard = () => {
     const [balances, setBalances] = useState([]);
     const [requests, setRequests] = useState([]);
     const [notifications, setNotifications] = useState([]);
@@ -66,4 +66,4 @@ const EmployeeDashboard = () => {
     );
 };
 
-export default EmployeeDashboard;
+export default RequestDashboard;

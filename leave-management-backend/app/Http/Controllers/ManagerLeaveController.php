@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request; // 💡 Included for safety
 
 class ManagerLeaveController extends Controller
 {
-    
     public function notification($userId, $leaveRequestId, $type, $message)
     {
         DB::table('notifications')->insert([
@@ -17,6 +18,7 @@ class ManagerLeaveController extends Controller
             'updated_at' => now(),
         ]);
     }
+
     public function approve($id)
     {
         return DB::transaction(function () use ($id) {
@@ -29,7 +31,6 @@ class ManagerLeaveController extends Controller
                 abort(404, 'Request not found');
             }
 
-            // 1. Check if it's awaiting supervisor review
             if ($leaveRequest->status !== 'pending') {
                 abort(400, 'Already processed');
             }
@@ -38,9 +39,6 @@ class ManagerLeaveController extends Controller
                 ->where('id', $leaveRequest->leave_type_id)
                 ->first();
 
-            // 💡 OPTIONAL SAFETYSIGNAL: We keep the balance read-check here 
-            // just to warn the supervisor if the balance is insufficient,
-            // BUT we remove the code that actually UPDATES and updates the table!
             if ($leaveType && $leaveType->is_balance_based) {
                 $balance = DB::table('leave_balances')
                     ->where('user_id', $leaveRequest->user_id)
@@ -56,15 +54,15 @@ class ManagerLeaveController extends Controller
                 }
             }
 
-            // 2. Simply push the status to 'pending_hr' (Handing off to HR)
+            // Update status to pending_hr
             DB::table('leave_requests')->where('id', $id)->update([
                 'status' => 'pending_hr',
-                'supervisor_id' => auth()->id(), // Saved from your MLD column schema
+                'supervisor_id' => auth()->id(),
                 'updated_at' => now()
-                // 💡 Notice 'approved_at' is removed here because HR marks the final approval time!
             ]);
 
-            // 3. Notify the employee that it passed step 1
+            $employee = DB::table('users')->where('id', $leaveRequest->user_id)->first();
+
             $this->notification(
                 $leaveRequest->user_id,
                 $leaveRequest->id,
@@ -72,13 +70,30 @@ class ManagerLeaveController extends Controller
                 'Your leave request has been approved by your manager and is awaiting final HR validation.'
             );
 
-            return response()->json(['message' => 'Approved by supervisor, sent to HR.']);
+            $hrManagers = DB::table('users')
+                ->where('id_service', $employee->id_service)
+                ->where('role', 'hr')
+                ->get();
+
+            foreach ($hrManagers as $hr) {
+                DB::table('notifications')->insert([
+                    'user_id' => $hr->id,
+                    'leave_request_id' => $id,
+                    'type' => 'pending_hr_validation',
+                    'message' => "A new leave request from {$employee->name} requires your final approval.",
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
+            }
+
+            return response()->json(['message' => 'Approved by supervisor, HR notified.']);
         });
     }
 
     public function reject($id)
     {
-        return DB::transaction(function () use ($request, $id) {
+        // 💡 FIXED: Removed undefined $request reference from the transaction closure closure
+        return DB::transaction(function () use ($id) {
 
             $leaveRequest = DB::table('leave_requests')
                 ->where('id', $id)
@@ -93,10 +108,11 @@ class ManagerLeaveController extends Controller
                 return response()->json(['error' => 'Already processed'], 400);
             }
 
+            // 💡 FIXED: Updated target key to 'supervisor_id' to prevent MariaDB column mismatch errors
             DB::table('leave_requests')->where('id', $id)->update([
                 'status' => 'rejected',
-                'supervisor' => auth()->id(),
-                'rejected_at' => now(),
+                'supervisor_id' => auth()->id(), 
+                'updated_at' => now(),
             ]);
 
             $this->notification(
@@ -110,27 +126,23 @@ class ManagerLeaveController extends Controller
         });
     }
 
-
-    public function pendingRequests() {
-        $pending_req = LeaveRequest::with(['user', 'leaveType'])
-        ->where('status', 'pending')
-        ->where('supervisor_id', auth()->id())
-        ->orderBy('created_at', 'desc')
-        ->get();
-        
-        return response()->json($pending_req->map(function ($req) {
-            return [
-                'id'               => $req->id,
-                'employee_name'    => $req->user->name,
-                'leave_type_label' => $req->leaveType->name,
-                'start_date'       => $req->start_date,
-                'end_date'         => $req->end_date,
-                'days_count'       => $req->days_count,
-                'status'           => $req->status,
-                'reason'           => $req->reason,
-                'created_at'       => $req->created_at,
-            ];
-        }));
+    public function pendingRequests() 
+    {
+        // 💡 FIXED: Rewritten entirely using DB::table and Joins to clear model reference crashes
+        $pending_req = DB::table('leave_requests')
+            ->join('users', 'leave_requests.user_id', '=', 'users.id')
+            ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
+            ->where('leave_requests.status', 'pending')
+            ->where('leave_requests.supervisor_id', auth()->id())
+            ->select(
+                'leave_requests.*',
+                'users.name as employee_name',
+                'leave_types.name as leave_type_label'
+            )
+            ->orderBy('leave_requests.created_at', 'desc')
+            ->get();
+            
+        // 💡 Returns structure directly to keep mapping intact with SupervisorPendingTable.jsx
+        return response()->json(['pending_req'=>$pending_req]);
     }
-
 }

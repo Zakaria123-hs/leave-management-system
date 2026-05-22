@@ -6,8 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import '../style/loginPage.css' 
 
 const LoginPage = () => {
-    const Navigate = useNavigate();
-    const { setUser } = useAuth();
+    const navigate = useNavigate();
+    const { user, setUser } = useAuth();
     const [userLogin, setUserLogin] = useState({
         email: '',
         password: ''
@@ -28,13 +28,10 @@ const LoginPage = () => {
             setUser(response.data.user);
             
             if(response.data.user.role === 'employee' || response.data.user.role === 'supervisor') {
-                Navigate('/employee');
+                navigate('/dashboard');
             }
-            // if(response.data.user.role === 'manager') {
-            //     Navigate('/manager');
-            // }
             if(response.data.user.role === 'hr') {
-                Navigate('/hr');
+                navigate('/hr');
             }
         } catch(error) {
             if (error.response?.status === 401) {
@@ -43,7 +40,7 @@ const LoginPage = () => {
                 console.error("Login Error:", error);
             }
         }
-        console.log('ok§')
+        // console.log(user)
     }
 
     return (
