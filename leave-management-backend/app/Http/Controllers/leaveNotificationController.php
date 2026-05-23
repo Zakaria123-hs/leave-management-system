@@ -12,6 +12,7 @@ class leaveNotificationController extends Controller
             ->where('user_id', auth()->id()) 
             ->orderBy('created_at', 'desc')   
             ->select(
+                'id',
                 'message',
                 'type',
                 'read_at',
@@ -25,11 +26,24 @@ class leaveNotificationController extends Controller
         ]);
     }
     public function readNotification($id) 
-        {
-            DB::table('notifications') 
-                ->where('id', $id)
-                ->where('user_id', auth()->id())
-                ->update(['read_at' => now()]);
-            return response()->json(['message' => 'Notification marked as read']);
-        }
+    {
+        // 💡 FIX: Cast to integer if your DB auto-increments IDs, or keep string if using UUIDs
+
+        $updated = DB::table('notifications') 
+            ->where('id', (string) $id)
+            ->where('user_id', auth()->id())
+            ->update(['read_at' => now()]);
+
+        // Log this to your storage/logs/laravel.log so we can see exactly how many rows changed
+        \Log::info("Notification Update Attempt", [
+            'user_id' => auth()->id(),
+            'searched_id' => $id,
+            'rows_affected' => $updated
+        ]);
+
+        return response()->json([
+            'message' => 'Notification processed',
+            'rows_affected' => $updated // 💡 If this says 0, the where clauses didn't match anything!
+        ]);
+    }
 }

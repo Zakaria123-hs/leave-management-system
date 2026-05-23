@@ -31,3 +31,7 @@ export const dashboardData = async () => {
 export const holidays = async () => {
     return await api.get('api/company-holidays')
 }
+
+export const readNotification = async (id) => {
+    return await api.post(`api/notifications/${id}/read`)
+}

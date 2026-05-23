@@ -1,9 +1,5 @@
-import { createContext, useContext, useState, useMemo, useEffect  } from "react";
-import axios from "axios";
+import { createContext, useContext, useState, useMemo, useEffect } from "react";
 import api from "../api/axios";
-
-axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://localhost:8000';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -13,31 +9,50 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const initializeAuth = async () => {
             try {
-
-                await api.get("/sanctum/csrf-cookie");
-
+                // 💡 Cookies are sent automatically by axios via withCredentials.
+                // Just check if the current session cookie is valid by calling the user profile.
                 const response = await api.get("/api/user");
                 setUser(response.data);
-                console.log("this is from context" , user)
-                console.log("this is from context" , response.data)
-            } catch(error){
+            } catch (error) {
                 console.error("Auth initialization failed:", error);
                 setUser(null);
             } finally {
-                setIsLoading(false);
+                setIsLoading(false); // 💡 This tells ProtectedRoute it's safe to check the user state now
             }
         };
 
         initializeAuth();
     }, []);
 
-    // This ensures components only re-render if the 'user' object actually changes
+    // Explicit login helper function to call from your Login Page component
+    const login = async (credentials) => {
+        // 1. Get the CSRF token first for login requests
+        await api.get("/sanctum/csrf-cookie");
+        
+        // 2. Attempt login
+        await api.post("api/login", credentials);
+
+        const response = await api.get("/api/user");
+        setUser(response.data);
+    };
+
+    const logout = async () => {
+        try {
+            await api.post("api/logout");
+        } catch (error) {
+            console.error("Logout failed on server", error);
+        } finally {
+            setUser(null);
+        }
+    };
+
     const value = useMemo(() => ({
         user,
         setUser,
         isAuthenticated: !!user,
         isLoading,
-        setIsLoading
+        login,
+        logout
     }), [user, isLoading]);
 
     return (

@@ -11,11 +11,11 @@ const CompanyHoliday = () => {
     const [loading, setLoading] = useState(true);
     const [notifications, setNotifications] = useState([]);
 
+    const fetchNetification = async () => {
+        const response = await getMyNotifications();
+        setNotifications(response.data.notifications)
+    }
     useEffect(() => {
-        const fetchNetification = async () => {
-            const response = await getMyNotifications();
-            setNotifications(response.data.notifications)
-        }
         const fetchHolidays = async () => {
             try {
                 const response = await holidays(); 
@@ -57,7 +57,8 @@ const CompanyHoliday = () => {
     return (
         <DashboardLayout 
             unreadCount={unreadCount} 
-            notifications={notifications} 
+            notifications={notifications}
+            fetachNotifications={fetchNetification}
         >
             <div className="max-w-[1280px] w-full flex flex-col gap-8">
                 <div className="holiday-calendar-card">

@@ -6,11 +6,11 @@ import { getMyNotifications } from "../services/employeeService";
 
 const SupervisorDashboard = () => {
     const [notifications, setNotifications] = useState([]);
+    const fetchNetification = async () => {
+        const response = await getMyNotifications();
+        setNotifications(response.data.notifications)
+    }
     useEffect( () => {
-        const fetchNetification = async () => {
-            const response = await getMyNotifications();
-            setNotifications(response.data.notifications)
-        }
         fetchNetification();
     }, [])
     const unreadCount = notifications ? notifications.filter(n => !n.read_at).length : 0;
@@ -18,6 +18,7 @@ const SupervisorDashboard = () => {
                 <DashboardLayout 
                     unreadCount={unreadCount}
                     notifications={notifications}
+                    fetachNotifications={fetchNetification}
                 >
             {/* The table drops neatly right into the changing workspace area */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">

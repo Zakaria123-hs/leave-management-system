@@ -1,20 +1,33 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Link, useLocation } from "react-router-dom"; // Added useLocation for active styles
-
-const DashboardLayout = ({ children, unreadCount, notifications }) => {
+import { Link, useLocation } from "react-router-dom";
+import { readNotification } from "../services/employeeService";
+const DashboardLayout = ({ children, unreadCount, notifications, fetachNotifications }) => {
     const { user } = useAuth();
-    const location = useLocation(); // Keeps track of what page the user is on
+    const location = useLocation();
     
-    const [openTimeMgmt, setOpenTimeMgmt] = useState(false);
-    const [openRequests, setOpenRequests] = useState(false);
-    const [openEmployee, setOpenEmployee] = useState(false);
-    const [showNotifications, setShowNotifications] = useState(false);
+    // Helper function to check if a menu link path is currently active
+    const isActive = (path) => location.pathname === path;
 
+    // 💡 AUTOMATION INITIALIZATION: Drops expand instantly if the current URL matches a child route
+    const [openEmployee, setOpenEmployee] = useState(() => isActive("/supervisor/requests"));
+    const [openTimeMgmt, setOpenTimeMgmt] = useState(() => isActive("/holidays"));
+    const [openRequests, setOpenRequests] = useState(() => 
+        isActive("/my-requests") || isActive("/mission-orders") || isActive("/expenses")
+    );
+    
+    const [showNotifications, setShowNotifications] = useState(false);
     const notificationRef = useRef(null);
 
-    // Helper function to check if a menu link is currently active
-    const isActive = (path) => location.pathname === path;
+    // 💡 SYNC ROUTE CHANGES: Keeps dropdowns open if user navigates via an external link/button click
+    useEffect(() => {
+        if (isActive("/supervisor/requests")) setOpenEmployee(true);
+        if (isActive("/holidays")) setOpenTimeMgmt(true);
+        if (isActive("/my-requests") || isActive("/mission-orders") || isActive("/expenses")) {
+            setOpenRequests(true);
+        }
+
+    }, [location.pathname]);
 
     // Handle clicking outside notifications dropdown to close it safely
     useEffect(() => {
@@ -31,10 +44,11 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
     const getHeaderTitle = () => {
         switch (location.pathname) {
             case "/dashboard": return "Dashboard Home";
-            case "/request-supervisor": return "Subordinate Leave Validations";
+            case "/supervisor/requests": return "Subordinate Leave Validations";
             case "/holidays": return "Company Holidays Calendar";
-            case "/mission-orders": return "Mission Orders";
-            case "/expenses": return "Expense Tracking";
+            case "/my-requests": return "My Time Requests";
+            case "/mission-orders": return "Mission Orders Workspace";
+            case "/expenses": return "Expense Tracking Workspace";
             default: return "HR Connect Workspace";
         }
     };
@@ -61,7 +75,7 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
                 {/* Main Sidebar Navigation Links Area */}
                 <nav className="flex-1 px-4 py-6 overflow-y-auto space-y-1 scrollbar-thin">
                     
-                    {/* Core Dashboard General Link - CONVERTED TO LINK */}
+                    {/* Core Dashboard General Link */}
                     <Link 
                         to="/dashboard" 
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition font-medium text-sm ${
@@ -87,11 +101,12 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
                                     </svg>
                                     <span>Employees Management</span>
                                 </div>
-                                <svg className={`w-4 h-4 transform transition-transform duration-200 ${openEmployee ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className={`w-4 h-4 transform transition-transform duration-200 ${(openEmployee || isActive("/supervisor/requests")) ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </button>
-                            {/* CONVERTED SUBMENU LINK */}
+                            
+                            {/* 💡 FIXED SUBMENU TOGGLE CHECK */}
                             {(openEmployee || isActive("/supervisor/requests")) && (
                                 <div className="pl-11 pr-2 space-y-1 border-l-2 border-white/10 ml-5">
                                     <Link 
@@ -119,13 +134,13 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
                                 </svg>
                                 <span>Time Management</span>
                             </div>
-                            <svg className={`w-4 h-4 transform transition-transform duration-200 ${openTimeMgmt ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-4 h-4 transform transition-transform duration-200 ${(openTimeMgmt || isActive("/holidays")) ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
                         
-                        {/* CONVERTED SUBMENU LINK */}
-                        {openTimeMgmt && (
+                        {/* 💡 FIXED SUBMENU TOGGLE CHECK */}
+                        {(openTimeMgmt || isActive("/holidays")) && (
                             <div className="pl-11 pr-2 space-y-1 border-l-2 border-white/10 ml-5">
                                 <Link 
                                     to="/holidays" 
@@ -151,13 +166,13 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
                                 </svg>
                                 <span>Requests</span>
                             </div>
-                            <svg className={`w-4 h-4 transform transition-transform duration-200 ${openRequests ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className={`w-4 h-4 transform transition-transform duration-200 ${(openRequests || isActive("/my-requests") || isActive("/mission-orders") || isActive("/expenses")) ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
                         
-                        {/* CONVERTED SUBMENU LINKS */}
-                        {(openRequests || isActive("/mission-orders") || isActive("/expenses")) && (
+                        {/* 💡 FIXED SUBMENU TOGGLE CHECK */}
+                        {(openRequests || isActive("/my-requests") || isActive("/mission-orders") || isActive("/expenses")) && (
                             <div className="pl-11 pr-2 space-y-1 border-l-2 border-white/10 ml-5">
                                 <Link 
                                     to="/my-requests" 
@@ -197,7 +212,6 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
                 {/* Top Navbar Layer */}
                 <header className="h-16 bg-white border-b border-gray-100 px-8 flex items-center justify-between shadow-sm sticky top-0 z-30">
                     <div>
-                        {/* 💡 FIXED: Dynamically matches the header title to your active page link selection */}
                         <h1 className="text-xl font-bold text-gray-800 tracking-tight">{getHeaderTitle()}</h1>
                     </div>
 
@@ -230,22 +244,71 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
                                         {!notifications || notifications.length === 0 ? (
                                             <div className="p-6 text-center text-xs text-gray-400">No recent notifications.</div>
                                         ) : (
-                                            notifications.map((item) => (
-                                                <div key={item.id} className="p-3.5 hover:bg-gray-50 transition flex gap-3 relative items-start">
-                                                    <div className="p-1.5 bg-sky-50 text-[#0082c3] rounded-lg mt-0.5 shrink-0">
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                        </svg>
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="text-xs font-semibold text-gray-900 leading-snug">{item.message}</h4>
-                                                        <span className="text-[10px] text-gray-400 block mt-1 font-medium">
-                                                            {new Date(item.created_at).toLocaleDateString()}
-                                                        </span>
-                                                    </div>
-                                                    {!item.read_at && <span className="w-2 h-2 bg-cyan-400 rounded-full mt-2 shrink-0"></span>}
-                                                </div>
-                                            ))
+                                            notifications.map((item) => {
+                                                
+                                                let targetPath = "/dashboard"; // Fallback path
+                                                
+                                                if (user?.role === "supervisor") {
+                                                    targetPath = "/supervisor/requests";
+                                                } else if (user?.role === "employee") {
+                                                    targetPath = "/my-requests";
+                                                } else if (user?.role === "hr") {
+                                                    targetPath = "/hr/requests";
+                                                }
+
+                                                return (
+                                                    <Link 
+                                                        key={item.id} 
+                                                        to={targetPath}
+                                                        onClick={async () => {
+                                                            setShowNotifications(false); // 1. Close dropdown
+                                                            
+                                                            if (!item.read_at) {
+                                                                try {
+                                                                    // 2. Tell Laravel to mark this specific notification as read
+                                                                    await readNotification(item.id);
+                                                                    
+                                                                    // 3. Re-fetch the list so unreadCount and indicators update instantly!
+                                                                    if (typeof fetachNotifications === 'function') {
+                                                                        await fetachNotifications();
+                                                                    }
+                                                                } catch (error) {
+                                                                    console.error("Failed to update notification status:", error);
+                                                                }
+                                                            }
+                                                        }}
+                                                        className="p-3.5 hover:bg-gray-50 transition flex gap-3 relative items-start group text-left w-full block"
+                                                    >
+                                                        {/* Notification Icon */}
+                                                        <div className="p-1.5 bg-sky-50 text-[#0082c3] group-hover:bg-[#0082c3] group-hover:text-white rounded-lg mt-0.5 shrink-0 transition-colors duration-200">
+                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                            </svg>
+                                                        </div>
+
+                                                        {/* Text Container */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="text-xs font-semibold text-gray-900 leading-snug group-hover:text-[#0082c3] transition-colors duration-150">
+                                                                {item.message}
+                                                            </h4>
+                                                            
+                                                            {/* 💡 "Click to view details" Action Text */}
+                                                            <span className="text-[10px] text-[#0082c3] font-medium block mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                                Click to view details &rarr;
+                                                            </span>
+                                                            
+                                                            <span className="text-[10px] text-gray-400 block mt-1 font-medium">
+                                                                {new Date(item.created_at).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Unread Dot Indicator */}
+                                                        {!item.read_at && (
+                                                            <span className="w-2 h-2 bg-cyan-400 rounded-full mt-2 shrink-0 group-hover:animate-ping"></span>
+                                                        )}
+                                                    </Link>
+                                                );
+                                            })
                                         )}
                                     </div>
                                 </div>
@@ -277,3 +340,6 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
 };
 
 export default DashboardLayout;
+
+
+

@@ -10,13 +10,11 @@ const DashboardPage = () => {
     const [error, setError] = useState(null);
 
     const [notifications, setNotifications] = useState([]);
-    useEffect( () => {
-    }, [])
+    const fetchNetification = async () => {
+        const response = await getMyNotifications();
+        setNotifications(response.data.notifications)
+    }
     useEffect(() => {
-        const fetchNetification = async () => {
-            const response = await getMyNotifications();
-            setNotifications(response.data.notifications)
-        }
         const fetchDashboardData = async () => {
             try {
                 const response = await dashboardData();
@@ -59,7 +57,8 @@ const DashboardPage = () => {
             <DashboardLayout 
                 unreadCount={unreadCount} 
                 notifications={notifications} 
-            > {/* 💡 Wrap everything inside your template layout */}
+                fetachNotifications={fetchNetification}
+            > 
             
             {/* The multi-column grid layout drops perfectly right into the main content workspace */}
             <div className="dashboard-grid">
