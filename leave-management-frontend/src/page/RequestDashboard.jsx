@@ -35,8 +35,6 @@ const RequestDashboard = () => {
         fetchData();
     }, []);
 
-    if (loading) return <LoadingSpinner />;
-
     const unreadCount = notifications ? notifications.filter(n => !n.read_at).length : 0;
 
     return (

@@ -20,6 +20,7 @@ Route::middleware(['auth:sanctum', 'role:employee,supervisor'])->group(function 
     Route::get('/my-leave-requests', [LeaveRequestController::class, 'leaveRequests']);
     Route::get('/my-balances', [LeaveRequestController::class, 'myBalances']);
     Route::post('/leave-requests', [LeaveRequestController::class, 'store']);
+    Route::get('dashboard-data', [LeaveRequestController::class, 'employeeData']);
 
     Route::get('/my-notifications', [leaveNotificationController::class, 'myNotifications']);
     Route::post('/notifications/{id}/read', [leaveNotificationController::class, 'readNotification']);

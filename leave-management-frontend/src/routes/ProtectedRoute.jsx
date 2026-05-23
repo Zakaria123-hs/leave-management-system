@@ -1,14 +1,14 @@
-import LoadingSpinner from "../components/LoadingSpinner";
+// import LoadingSpinner from "../components/LoadingSpinner";
 import { useAuth } from "../context/AuthContext"
 import { Navigate } from "react-router-dom";
 const ProtectedRoute = ({children, role}) => {
 
-    const {user, isLoading} = useAuth()
+    const {user} = useAuth()
 
     // i need to implementv loading speener
-    if (isLoading) {
-        return <LoadingSpinner/>
-    }
+    // if (isLoading) {
+    //     return <LoadingSpinner/>
+    // }
 
     if (!user) {
         console.log(user)

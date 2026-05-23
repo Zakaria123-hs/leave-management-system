@@ -1,6 +1,5 @@
 import  { useState, useEffect } from "react";
 import { pendingRequest, approveRequest, rejectRequest } from "../services/superviceService";
-import axios from "axios";
 
 const SupervisorPendingTable = () => {
     const [requests, setRequests] = useState([]);

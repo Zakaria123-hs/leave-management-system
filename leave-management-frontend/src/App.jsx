@@ -21,7 +21,7 @@ function App() {
 
             {/* Standard Employee Workspaces */}
             <Route 
-                path="/dashboard" 
+                path="/my-requests" 
                 element={
                     <ProtectedRoute role={['employee', 'supervisor', 'hr']}>
                         <RequestDashboard />

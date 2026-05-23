@@ -186,4 +186,60 @@ class LeaveRequestController extends Controller
             ->get();
         return response()->json(['myBalance' => $balance]);
     }
+    public function employeeData() {
+        // 1. Automatically grab the logged-in user's ID
+        $userId = auth()->id();
+
+        if (!$userId) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        // 2. Fetch General Information & Service details (Removed the sites join)
+        $employeeInfo = DB::table('users')
+            ->leftJoin('services', 'users.id_service', '=', 'services.id')
+            ->where('users.id', $userId)
+            ->select(
+                'users.name as employee_name',
+                'users.role', 
+                'users.email',
+                'services.name as service_name'
+            )
+            ->first();
+
+        if (!$employeeInfo) {
+            return response()->json(['error' => 'Employee details not found'], 404);
+        }
+
+        // 3. Calculate Time Off Statistics for this authenticated user
+        $leaveStats = DB::table('leave_requests')
+            ->where('user_id', $userId)
+            ->select(
+                // Sum of days for fully validated/completed requests
+                DB::raw("SUM(CASE WHEN status = 'approved' THEN days_count ELSE 0 END) as days_approved"),
+                
+                // Sum of days for ALL pending phases (awaiting manager OR awaiting HR validation)
+                DB::raw("SUM(CASE WHEN status IN ('pending', 'pending_hr') THEN days_count ELSE 0 END) as days_awaiting_approval")
+            )
+            ->first();
+
+        // 4. Get total remaining days across balances
+        $totalRemainingDays = DB::table('leave_balances')
+            ->where('user_id', $userId)
+            ->sum('remaining_days');
+
+        // 5. Build the final clean dataset for your frontend card element
+        return response()->json([
+            'general_info' => [
+                'name'    => $employeeInfo->employee_name,
+                'role'    => $employeeInfo->role,
+                'email'   => $employeeInfo->email,
+                'service' => $employeeInfo->service_name ?? 'N/A',
+            ],
+            'time_off' => [
+                'days_approved'          => floatval($leaveStats->days_approved ?? 0),
+                'days_awaiting_approval' => floatval($leaveStats->days_awaiting_approval ?? 0),
+                'days_remaining'         => floatval($totalRemainingDays ?? 0),
+            ]
+        ]);
+    }
 }

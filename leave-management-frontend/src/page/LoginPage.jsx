@@ -29,7 +29,7 @@ const LoginPage = () => {
             setUser(response.data.user);
             
             if(response.data.user.role === 'employee' || response.data.user.role === 'supervisor') {
-                navigate('/dashboard');
+                navigate('/my-requests');
             }
             if(response.data.user.role === 'hr') {
                 navigate('/hr');

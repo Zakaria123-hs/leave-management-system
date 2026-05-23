@@ -160,9 +160,9 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
                         {(openRequests || isActive("/mission-orders") || isActive("/expenses")) && (
                             <div className="pl-11 pr-2 space-y-1 border-l-2 border-white/10 ml-5">
                                 <Link 
-                                    to="/dashboard" 
+                                    to="/my-requests" 
                                     className={`block py-2 px-3 text-xs font-medium rounded-lg transition ${
-                                        isActive("/dashboard") ? "bg-white/10 text-white font-semibold" : "text-sky-100 hover:text-white hover:bg-white/5"
+                                        isActive("/my-requests") ? "bg-white/10 text-white font-semibold" : "text-sky-100 hover:text-white hover:bg-white/5"
                                     }`}
                                 >
                                     Time requests
