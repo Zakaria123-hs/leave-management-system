@@ -30,6 +30,7 @@ Route::middleware(['auth:sanctum', 'role:employee,supervisor'])->group(function 
         $holidays = DB::table('holidays')->get();
         return response()->json(['holidays' => $holidays]);
     });
+    Route::get('team-work', [LeaveRequestController::class, 'getTeam']);
 });
 
 Route::middleware(['auth:sanctum', 'role:supervisor'])->group(function () {

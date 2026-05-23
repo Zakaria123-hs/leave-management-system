@@ -35,3 +35,7 @@ export const holidays = async () => {
 export const readNotification = async (id) => {
     return await api.post(`api/notifications/${id}/read`)
 }
+
+export const getTeam = async () => {
+    return await api.get("/api/team-work");
+};

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class LeaveRequestController extends Controller
 {
@@ -243,4 +244,35 @@ class LeaveRequestController extends Controller
         ]);
     }
     
+    public function getTeam()
+    {
+        $user = auth()->user();
+
+        $query = User::where('id', '!=', $user->id)
+            ->with('service');
+
+        if ($user->role === 'hr') {
+            // HR sees everyone
+        } elseif ($user->role === 'supervisor') {
+            // supervisor sees same service only
+            $query->where('id_service', $user->id_service);
+        } else {
+            // employee sees same service only
+            $query->where('id_service', $user->id_service);
+        }
+
+        $team = $query->get();
+
+        return response()->json($team->map(function ($member) use ($user) {
+            return [
+                'id'             => $member->id,
+                'name'           => $member->name,
+                'email'          => $member->email,
+                'role'           => $member->role,
+                'service'        => $member->service,
+                'is_supervisor'  => $member->role === 'supervisor',
+                'is_my_supervisor' => $member->id === $user->supervisor_id,
+            ];
+        }));
+    }
 }

@@ -5,6 +5,7 @@ import Login from "./page/LoginPage";
 import ProtectedRoute from "./routes/ProtectedRoute"; 
 import DashboardPage from "./page/DashboardPage";
 import CompanyHoliday from "./page/CompanyHoliday";
+import TeamPage from "./page/TeamPage";
 function App() {
     return (
         <Routes> {/* 💡 NO <BrowserRouter> wrap here! Only start with <Routes> */}
@@ -43,6 +44,14 @@ function App() {
                 element={
                     <ProtectedRoute role={['employee', 'supervisor', 'hr']}>
                         <CompanyHoliday />
+                    </ProtectedRoute>
+                } 
+            />
+            <Route 
+                path="/employee" 
+                element={
+                    <ProtectedRoute role={['employee', 'supervisor', 'hr']}>
+                        <TeamPage />
                     </ProtectedRoute>
                 } 
             />
