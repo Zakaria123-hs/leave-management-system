@@ -7,7 +7,7 @@ import '../style/loginPage.css'
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const { user, setUser } = useAuth();
+    const { setUser } = useAuth();
     const [userLogin, setUserLogin] = useState({
         email: '',
         password: ''
@@ -21,6 +21,7 @@ const LoginPage = () => {
     }
 
     const HandleLogin = async (e) => {
+
         e.preventDefault();
         try {
             await api.get("/sanctum/csrf-cookie");
@@ -39,8 +40,7 @@ const LoginPage = () => {
             } else {
                 console.error("Login Error:", error);
             }
-        }
-        // console.log(user)
+        }   
     }
 
     return (

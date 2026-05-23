@@ -18,7 +18,7 @@ return new class extends Migration
             $table->date('start_date');
             $table->date('end_date');
             $table->decimal('days_count', 5, 2); // Pre-calculated working days
-            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'pending_hr', 'approved', 'rejected'])->default('pending');
             $table->foreignId('manager_id')->nullable()->constrained('users'); // The approver
             $table->text('reason')->nullable();
             $table->date('approved_at')->default(null);

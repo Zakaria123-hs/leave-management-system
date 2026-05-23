@@ -5,9 +5,9 @@ export const pendingRequest = async () => {
 }
 
 export const approveRequest = async (id) => {
-    return await api.post(`api//leave/approve/${id}`)
+    return await api.post(`api/leave/approve/${id}`)
 }
 
 export const rejectRequest = async (id) => {
-    return await api.post(`api//leave/reject/${id}`)
+    return await api.post(`api/leave/reject/${id}`)
 } 

@@ -13,7 +13,7 @@ const SupervisorPendingTable = () => {
             // Replace with your actual supervisor pending API route
             const response = await pendingRequest();
             setRequests(response.data.pending_req);
-            console.log(response.data.pending_req)
+
         } catch (error) {
             console.error("Error fetching team requests:", error);
         } finally {
@@ -28,14 +28,15 @@ const SupervisorPendingTable = () => {
     // Handle Action (Approve / Reject)
     const handleAction = async (id, statusAction) => {
         try {
-            // URL calls your supervisor approve function or reject function
-            const url = statusAction === "approve" 
-                ? `/api/supervisor/approve/${id}` 
-                : `/api/supervisor/reject/${id}`;
-
-            const response = await axios.post(url);
+            if (statusAction === "approve") {
+                const response = await approveRequest(id)
+                setMessage(`Successfully processed: ${response.message}`);
+            }
+            if (statusAction === "reject") {
+                const response = await rejectRequest(id)
+                setMessage(`Successfully processed: ${response.message}`);
+            }
             
-            setMessage(`Successfully processed: ${statusAction}`);
             // Refresh table data
             fetchPendingRequests(); 
             
@@ -90,14 +91,14 @@ const SupervisorPendingTable = () => {
                                         {/* Approve Button */}
                                         <button 
                                             onClick={() => handleAction(req.id, "approve")}
-                                            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-sm text-[11px]"
+                                            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-sm text-[11px] cursor-pointer"
                                         >
                                             Approve
                                         </button>
                                         {/* Reject Button */}
                                         <button 
                                             onClick={() => handleAction(req.id, "reject")}
-                                            className="bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-sm text-[11px]"
+                                            className="bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-sm text-[11px] cursor-pointer"
                                         >
                                             Reject
                                         </button>
