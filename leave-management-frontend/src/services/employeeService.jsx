@@ -23,3 +23,7 @@ export const postLeaveRequest = async (request) => {
 export const postReadNotification = async (id) => {
     return await api.post(`api/notifications/${id}/read`)
 }
+
+export const dashboardData = async () => {
+    return await api.get('api/dashboard-data')
+}

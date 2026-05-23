@@ -2,7 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import RequestDashboard from "./page/RequestDashboard";
 import SupervisorDashboard from "./page/SupervisorDashboard";
 import Login from "./page/LoginPage";
-import ProtectedRoute from "./routes/ProtectedRoute"; // Your authentication middleware guard
+import ProtectedRoute from "./routes/ProtectedRoute"; 
+import DashboardPage from "./page/DashboardPage";
 function App() {
     return (
         <Routes> {/* 💡 NO <BrowserRouter> wrap here! Only start with <Routes> */}
@@ -25,6 +26,14 @@ function App() {
                 element={
                     <ProtectedRoute role={['employee', 'supervisor', 'hr']}>
                         <RequestDashboard />
+                    </ProtectedRoute>
+                } 
+            />
+            <Route 
+                path="/dashboard" 
+                element={
+                    <ProtectedRoute role={['employee', 'supervisor', 'hr']}>
+                        <DashboardPage />
                     </ProtectedRoute>
                 } 
             />
