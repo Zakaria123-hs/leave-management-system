@@ -242,4 +242,5 @@ class LeaveRequestController extends Controller
             ]
         ]);
     }
+    
 }

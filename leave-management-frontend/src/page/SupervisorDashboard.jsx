@@ -1,10 +1,24 @@
 
+import { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import SupervisorPendingTable from "../components/SupervisorPendingTable";
+import { getMyNotifications } from "../services/employeeService";
 
 const SupervisorDashboard = () => {
+    const [notifications, setNotifications] = useState([]);
+    useEffect( () => {
+        const fetchNetification = async () => {
+            const response = await getMyNotifications();
+            setNotifications(response.data.notifications)
+        }
+        fetchNetification();
+    }, [])
+    const unreadCount = notifications ? notifications.filter(n => !n.read_at).length : 0;
     return (
-        <DashboardLayout>
+                <DashboardLayout 
+                    unreadCount={unreadCount}
+                    notifications={notifications}
+                >
             {/* The table drops neatly right into the changing workspace area */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div className="mb-6">

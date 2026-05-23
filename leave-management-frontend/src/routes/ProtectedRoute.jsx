@@ -9,7 +9,7 @@ const ProtectedRoute = ({children, role}) => {
     // if (isLoading) {
     //     return <LoadingSpinner/>
     // }
-
+    
     if (!user) {
         console.log(user)
         console.log('from not user')

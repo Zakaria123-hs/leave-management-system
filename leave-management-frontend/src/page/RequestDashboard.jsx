@@ -2,7 +2,6 @@ import LeaveRequestsTable from "../components/LeaveRequestsTable";
 import { getMyBalances, getMyNotifications, getMyRequests } from "../services/employeeService";
 import { useState, useEffect } from "react";
 import LeaveRequestForm from "../components/LeaveRequestForm";
-import LoadingSpinner from "../components/LoadingSpinner";
 import LeaveRequestBalance from "../components/LeaveRequestBalance";
 import DashboardLayout from "../layouts/DashboardLayout";
 
@@ -10,7 +9,6 @@ const RequestDashboard = () => {
     const [balances, setBalances] = useState([]);
     const [requests, setRequests] = useState([]);
     const [notifications, setNotifications] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [showBalance, setShowBalance] = useState(false);
 
@@ -26,13 +24,11 @@ const RequestDashboard = () => {
             setNotifications(notificationsRes.data.notifications);
         } catch (error) {
             console.error("Failed to fetch data:", error);
-        } finally {
-            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchData();
+        fetchData;
     }, []);
 
     const unreadCount = notifications ? notifications.filter(n => !n.read_at).length : 0;

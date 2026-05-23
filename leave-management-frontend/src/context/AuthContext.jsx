@@ -18,7 +18,8 @@ export const AuthProvider = ({ children }) => {
 
                 const response = await api.get("/api/user");
                 setUser(response.data);
-
+                console.log("this is from context" , user)
+                console.log("this is from context" , response.data)
             } catch(error){
                 console.error("Auth initialization failed:", error);
                 setUser(null);

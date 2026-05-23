@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { dashboardData } from '../services/employeeService';
-import DashboardLayout from "../layouts/DashboardLayout"; // 💡 Import your layout wrapper
+import DashboardLayout from "../layouts/DashboardLayout"; 
+import { getMyNotifications } from '../services/employeeService';
 import '../style/dashboardLayout.css'; 
 
 const DashboardPage = () => {
@@ -8,7 +9,14 @@ const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const [notifications, setNotifications] = useState([]);
+    useEffect( () => {
+    }, [])
     useEffect(() => {
+        const fetchNetification = async () => {
+            const response = await getMyNotifications();
+            setNotifications(response.data.notifications)
+        }
         const fetchDashboardData = async () => {
             try {
                 const response = await dashboardData();
@@ -20,8 +28,10 @@ const DashboardPage = () => {
                 setLoading(false);
             }
         };
+        fetchNetification();
         fetchDashboardData();
     }, []);
+    const unreadCount = notifications ? notifications.filter(n => !n.read_at).length : 0;
 
     if (loading) {
         return (
@@ -46,7 +56,10 @@ const DashboardPage = () => {
     const { general_info, time_off } = data;
 
     return (
-        <DashboardLayout> {/* 💡 Wrap everything inside your template layout */}
+            <DashboardLayout 
+                unreadCount={unreadCount} 
+                notifications={notifications} 
+            > {/* 💡 Wrap everything inside your template layout */}
             
             {/* The multi-column grid layout drops perfectly right into the main content workspace */}
             <div className="dashboard-grid">

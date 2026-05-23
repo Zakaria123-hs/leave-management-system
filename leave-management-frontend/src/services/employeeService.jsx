@@ -27,3 +27,7 @@ export const postReadNotification = async (id) => {
 export const dashboardData = async () => {
     return await api.get('api/dashboard-data')
 }
+
+export const holidays = async () => {
+    return await api.get('api/company-holidays')
+}

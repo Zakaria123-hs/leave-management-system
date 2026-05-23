@@ -125,7 +125,7 @@ const DashboardLayout = ({ children, unreadCount, notifications }) => {
                         </button>
                         
                         {/* CONVERTED SUBMENU LINK */}
-                        {(openTimeMgmt || isActive("/holidays")) && (
+                        {openTimeMgmt && (
                             <div className="pl-11 pr-2 space-y-1 border-l-2 border-white/10 ml-5">
                                 <Link 
                                     to="/holidays" 
