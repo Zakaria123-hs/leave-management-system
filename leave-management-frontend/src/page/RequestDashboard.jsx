@@ -22,13 +22,15 @@ const RequestDashboard = () => {
             setBalances(balancesRes.data.myBalance);
             setRequests(requestsRes.data.my_requests);
             setNotifications(notificationsRes.data.notifications);
+            console.log("from reqyestDashbord", requestsRes.data.my_requests)
         } catch (error) {
             console.error("Failed to fetch data:", error);
         }
     };
 
     useEffect(() => {
-        fetchData;
+        fetchData();
+        console.log("zak")
     }, []);
 
     const unreadCount = notifications ? notifications.filter(n => !n.read_at).length : 0;

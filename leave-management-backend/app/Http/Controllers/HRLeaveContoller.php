@@ -7,21 +7,24 @@ use Illuminate\Support\Facades\DB;
 
 class HRLeaveContoller extends Controller
 {
-    
     public function hrPendingRequests() {
         // Get the authenticated HR user's department service ID
         $hrServiceId = auth()->user()->id_service; 
 
+        // 💡 FIX: Start directly from your base data table context
         $pending = DB::table('leave_requests')
+            // Join employees safely
             ->join('users as employees', 'leave_requests.user_id', '=', 'employees.id')
+            // Join managers/supervisors safely
             ->join('users as supervisors', 'leave_requests.supervisor_id', '=', 'supervisors.id')
+            // Join leave category details
             ->join('leave_types', 'leave_requests.leave_type_id', '=', 'leave_types.id')
             
-            // 1. Only fetch records belonging to this HR's service department
-            ->where('employees.id_service', $hrServiceId) 
+            // 1. Explicitly match the service ID of the employee
+            ->where('employees.id_service', '=', $hrServiceId) 
             
-            // 2. CRITICAL: Only show what is waiting for HR validation!
-            ->where('leave_requests.status', 'pending_hr') 
+            // 2. Filter by status string matches
+            ->where('leave_requests.status', '=', 'pending_hr') 
             
             ->orderBy('leave_requests.created_at', 'asc') 
             ->select(
@@ -38,6 +41,7 @@ class HRLeaveContoller extends Controller
 
         return response()->json(['hr_pending' => $pending]);
     }
+
 
     public function hrValidate(Request $request, $id) {
         $request->validate([

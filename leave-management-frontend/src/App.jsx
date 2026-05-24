@@ -16,7 +16,7 @@ function App() {
             <Route 
                 path="/supervisor/requests" 
                 element={
-                    <ProtectedRoute role={['supervisor']}>
+                    <ProtectedRoute role={['supervisor', 'hr']}>
                         <SupervisorDashboard />
                     </ProtectedRoute>
                 } 

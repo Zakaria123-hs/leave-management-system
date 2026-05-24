@@ -170,7 +170,10 @@ class LeaveRequestController extends Controller
             )
             ->orderBy('leave_requests.created_at', 'desc')
             ->get();
-
+            \Log::info("request ", [
+            'user_id' => auth()->id(),
+            'request' => $requests
+        ]);
         // Keeping your standard structural json wrap layout response
         return response()->json(['my_requests' => $requests]);
     }

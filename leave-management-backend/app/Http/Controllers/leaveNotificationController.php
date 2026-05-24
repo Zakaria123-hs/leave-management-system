@@ -35,11 +35,7 @@ class leaveNotificationController extends Controller
             ->update(['read_at' => now()]);
 
         // Log this to your storage/logs/laravel.log so we can see exactly how many rows changed
-        \Log::info("Notification Update Attempt", [
-            'user_id' => auth()->id(),
-            'searched_id' => $id,
-            'rows_affected' => $updated
-        ]);
+        
 
         return response()->json([
             'message' => 'Notification processed',

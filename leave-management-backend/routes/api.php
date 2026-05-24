@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::middleware(['auth:sanctum', 'role:employee,supervisor'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:employee,supervisor,hr'])->group(function () {
     Route::get('/leave-types', function () {
         $types = DB::table('leave_types')->get();
         return response()->json($types); 
@@ -40,7 +40,8 @@ Route::middleware(['auth:sanctum', 'role:supervisor'])->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'role:hr'])->group( function () {
-    Route::get('/hr/approved-requests', [HRLeaveContoller::class, 'hrReport']);
+    Route::get('/hr/pending', [HRLeaveContoller::class, 'hrPendingRequests']);
+    Route::post('/hr/validate/{id}', [HRLeaveContoller::class, 'hrValidate']);
 });
 
 

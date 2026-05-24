@@ -100,7 +100,7 @@ const DashboardLayout = ({ children, unreadCount, notifications, fetachNotificat
                     </Link>
 
                     {/* Conditional Supervisor Controls Section */}
-                    {user?.role === "supervisor" && (
+                    {user?.role === "supervisor" || user?.role === "hr"  && (
                         <div className="space-y-1">
                             <button 
                                 onClick={() => setOpenEmployee(!openEmployee)}

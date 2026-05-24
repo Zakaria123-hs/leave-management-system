@@ -1,5 +1,6 @@
-import  { useState, useMemo } from 'react';
+import  { useState, useMemo, useEffect } from 'react';
 import LeaveRequestBalance from './LeaveRequestBalance';
+
 
 const LeaveRequestsTable = ({ requests = [], onBalanceClick,onFormClick }) => {
     const [selectedCategory, setSelectedCategory] = useState('All');
