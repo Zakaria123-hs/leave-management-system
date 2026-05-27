@@ -10,6 +10,7 @@ class leaveNotificationController extends Controller
     public function myNotifications() {
         $notifications = DB::table('notifications')
             ->where('user_id', auth()->id()) 
+            ->whereNull('read_at')
             ->orderBy('created_at', 'desc')   
             ->select(
                 'id',
