@@ -41,6 +41,7 @@ class LeaveRequestController extends Controller
     }
 
     public function store(Request $request) {
+        $user = auth()->user(); // Fetches currently logged in employee profile metadata
         $validate = validator::make($request->all(),[
             'leave_type_id' => 'required|exists:leave_types,id',
             'start_date'    => 'required|date|after_or_equal:today',
@@ -48,9 +49,32 @@ class LeaveRequestController extends Controller
             'reason'        => 'nullable|string|max:500',
         ]);
 
+
+
         if ($validate->fails()) {
             return response()->json(['errors' => $validate->errors()], 422);
         }
+
+
+
+        // 💡 1. MOROCCAN LABOR CODE GATEKEEPER: Check 6 Months continuous service
+        if (!$user->hired_at) {
+            return response()->json([
+                'error' => 'Your hiring date is not configured. Please contact HR to update your profile.'
+            ], 403);
+        }
+
+        // Parse the date with Carbon to compute precise month differences
+        $hiringDate = \Carbon\Carbon::parse($user->hired_at);
+        $monthsOfService = $hiringDate->diffInMonths(now());
+
+        if ($monthsOfService < 6) {
+            return response()->json([
+                'error' => "According to Moroccan Labor Code, you become eligible for paid annual leave only after completing 6 months of continuous service. You currently have {$monthsOfService} months of service."
+            ], 403);
+        }
+
+        // ... The rest of your code (Service staff checks, SQL Inserts, Notifications) runs smoothly below here ...
 
         // check if imployee have request during these dates
         $isOverlap = DB::table('leave_requests')
@@ -93,7 +117,6 @@ class LeaveRequestController extends Controller
                 return response()->json(['error' => 'Your balance is insufficient'], 400);
             }
         }
-        $user = auth()->user(); // Fetches currently logged in employee profile metadata
 
         // 1. Get the min_active_staff configuration limit for this specific service
         $service = DB::table('services')
@@ -135,7 +158,7 @@ class LeaveRequestController extends Controller
             'days_count'    => $days_count,
             'reason'        => $request->reason,
             'status'        => 'pending',
-            'supervisor_id' => $user->supervisor_id, // ← directly from user column
+            'supervisor_id' => $user->supervisor_id, 
             'created_at'    => now(),
             'updated_at'    => now(),
         ]);
