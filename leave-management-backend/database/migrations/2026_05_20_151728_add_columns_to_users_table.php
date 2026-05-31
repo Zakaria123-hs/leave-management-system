@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('level')->nullable()->after('role');
+            $table->date('hired_at')->after('password');
             
             $table->unsignedBigInteger('id_service')->nullable()->after('level');
             $table->foreign('id_service')->references('id')->on('services')->onDelete('set null');
