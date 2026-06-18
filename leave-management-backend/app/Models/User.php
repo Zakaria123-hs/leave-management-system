@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\LeaveBalance;  // ← required
 use App\Models\LeaveRequest;
+use App\Models\RequestDocument;
 use App\Models\service;
 
 class User extends Authenticatable
@@ -48,6 +49,11 @@ class User extends Authenticatable
     public function subordinates()
     {
         return $this->hasMany(User::class, 'supervisor_id');
+    }
+
+    public function requestDocument()
+    {
+        return $this->hasMany(RequestDocument::class);
     }
     /**
      * The attributes that should be hidden for serialization.
