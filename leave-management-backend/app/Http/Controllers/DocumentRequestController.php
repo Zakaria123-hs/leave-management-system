@@ -39,4 +39,24 @@ class DocumentRequestController extends Controller
 
         return response()->json(['message' => 'Document request submitted.'], 201);
     }
+
+    public function myRequests()
+    {
+        $requests = DB::table('document_requests')
+            ->join('documents', 'document_requests.document_id', '=', 'documents.id')
+            ->where('document_requests.user_id', auth()->id())
+            ->orderByDesc('document_requests.created_at')
+            ->select(
+                'document_requests.id',
+                'documents.name as document',
+                'document_requests.reason',
+                'document_requests.status',
+                'document_requests.rejection_reason',
+                'document_requests.created_at',
+            )
+            ->get();
+
+        return response()->json(['requests' => $requests]);
+    }
+
 }
