@@ -58,5 +58,23 @@ class DocumentRequestController extends Controller
 
         return response()->json(['requests' => $requests]);
     }
+    
+    public function pending()
+    {
+        $pending = DB::table('document_requests')
+            ->join('users', 'document_requests.user_id', '=', 'users.id')
+            ->join('documents', 'document_requests.document_id', '=', 'documents.id')
+            ->where('document_requests.status', 'pending')
+            ->orderBy('document_requests.created_at')
+            ->select(
+                'document_requests.id',
+                'users.name as employee_name',
+                'documents.name as document',
+                'document_requests.reason',
+                'document_requests.created_at',
+            )
+            ->get();
 
+        return response()->json(['pending' => $pending]);
+    }
 }
