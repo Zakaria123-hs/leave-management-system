@@ -77,7 +77,7 @@ class DocumentRequestController extends Controller
 
         return response()->json(['pending' => $pending]);
     }
-    
+
     public function approve($id)
     {
         $req = DB::table('document_requests')->where('id', $id)->first();
@@ -102,4 +102,30 @@ class DocumentRequestController extends Controller
         return response()->json(['message' => 'Document request approved.']);
     }
 
+    public function reject(Request $request, $id)
+    {
+        $request->validate(['rejection_reason' => 'required|string|max:500']);
+
+        $req = DB::table('document_requests')->where('id', $id)->first();
+        if (!$req || $req->status !== 'pending') {
+            return response()->json(['error' => 'Request not found or already processed.'], 422);
+        }
+
+        DB::table('document_requests')->where('id', $id)->update([
+            'status'           => 'rejected',
+            'rejection_reason' => $request->rejection_reason,
+            'updated_at'       => now(),
+        ]);
+
+        DB::table('notifications')->insert([
+            'user_id'             => $req->user_id,
+            'document_request_id' => $id,
+            'type'                => 'document_rejected',
+            'message'             => 'Your document request has been rejected.',
+            'created_at'          => now(),
+            'updated_at'          => now(),
+        ]);
+
+        return response()->json(['message' => 'Document request rejected.']);
+    }
 }
